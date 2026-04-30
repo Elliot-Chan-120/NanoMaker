@@ -8,3 +8,6 @@ venv/
 dist/
 build/
 .DS_Store
+
+.ipynb_checkpoints/
+.jupyter/
