@@ -11,4 +11,5 @@ build/
 
 .ipynb_checkpoints/
 .jupyter/
+src/database/BindingDB_All_202605_tsv.zip
 
