@@ -79,5 +79,3 @@ def encoder_check():
         aa_emb = get_embedding(aa)
         if aa_str == encoder.get_aa_id(aa_emb):
             print(f"{aa_str}: str <-> vect aligned")
-
-encoder_check()

@@ -29,3 +29,7 @@ AAs that didn't have anything special going on (nonpolar) were all 0s, (non-)pol
     - Y, S, T
 13 5-membered ring
     - P
+
+
+Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), also I did this stuff already
+What are the odds someone reads this far into my project...

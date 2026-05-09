@@ -127,16 +127,9 @@ HALF_LIFE = {
     'Y': 2.8
 }
 
-# encode functional groups?
-# functional group list:
-# Acidic R groups , Basic R groups , Guanidium , Imidazole ,
-# Amide , 2S Bridge , Sulfur , Thiol , Aromatic , Indole ,
-# Branched HC , Hydroxyl , 5-membered ring
 
-# 13 total features
-
-# maybe make a pseudo molecular fingerprint
-# from Biochemistry - Paul Jay Friedman (what are the odds someone actually looks far enough into this doc?)
+# pseudo molecular fingerprint accounting for biochemical / functional group standout features
+# check function_fp_scheme.txt for more understanding
 FUNCTIONAL_FP = {
     "A": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     "G": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
