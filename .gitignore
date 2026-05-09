@@ -13,5 +13,9 @@ build/
 .jupyter/
 src/database/BindingDB_All_202605_tsv.zip
 src/database/unique_pdb_cache.csv
-nano_notebooks/unique_pdb_cache.csv
+nano_notebooks/notebook_database/unique_pdb_cache.csv
+nano_notebooks/notebook_database/AA3D_df.csv
+nano_notebooks/notebook_database/unique_smiles_strings.csv
+nano_notebooks/notebook_database/molfp_df.csv
+nano_notebooks/notebook_database/all_pairs_df.csv
 

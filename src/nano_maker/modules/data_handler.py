@@ -1,6 +1,3 @@
-from src.utility.data_modules import *
-from src.utility.path_modules import *
-
 # task
 # splits data into SMILES, PROTEIN and METRIC
 # calls on drug and protein encoder to create numerical data
