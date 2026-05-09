@@ -1,0 +1,31 @@
+This is a handmade functional grouping scheme
+For each amino acid where applicable, I've categorized them biochemically / organic chemistry style
+I've then one-hot encoded these properties in nAAno_library.py
+AAs that didn't have anything special going on (nonpolar) were all 0s, (non-)polarity is already tracked
+
+1  Acidic R groups
+    - D and E
+2  Basic R groups
+    - K, R, H
+3  Guanidium
+    - R
+4  Imidazole (it's a different 5-membered ring so I didn't put this with 13)
+    - H
+5  Amide
+    - N and Q
+6  2S Bridge
+    - C
+7  Sulfur
+    - M and C
+8  Thiol
+    - M
+9  Aromatic
+    - F, Y, W
+10 Indole
+    - W
+11 Branched HC
+    - L, I, V
+12 Hydroxyl
+    - Y, S, T
+13 5-membered ring
+    - P

@@ -63,13 +63,15 @@ def get_embedding(aa_id: str):
         HYDROPHOBICITY_IDXS[aa_id],
         HALF_LIFE[aa_id],
     ]
+    embedding += FUNCTIONAL_FP[aa_id]
     return embedding
 
 
 def encoder_check():
     encoder = NAAnoEncoder(verbose=True)
     encoder.initialize()
-    print(encoder.nAAno_emb)
+    for aa_code, aa_vect in encoder.nAAno_emb.items():
+        print(f"{aa_code} -- {aa_vect}")
 
     # check decoder and encoder
     for aa in AA_IDS:

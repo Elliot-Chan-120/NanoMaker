@@ -126,3 +126,36 @@ HALF_LIFE = {
     'W': 2.8,
     'Y': 2.8
 }
+
+# encode functional groups?
+# functional group list:
+# Acidic R groups , Basic R groups , Guanidium , Imidazole ,
+# Amide , 2S Bridge , Sulfur , Thiol , Aromatic , Indole ,
+# Branched HC , Hydroxyl , 5-membered ring
+
+# 13 total features
+
+# maybe make a pseudo molecular fingerprint
+# from Biochemistry - Paul Jay Friedman (what are the odds someone actually looks far enough into this doc?)
+FUNCTIONAL_FP = {
+    "A": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "G": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "D": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "E": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "K": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "R": [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "H": [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "N": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    "Q": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    "C": [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+    "M": [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+    "F": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    "Y": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0],
+    "W": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+    "L": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    "I": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    "V": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    "S": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    "T": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    "P": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+}
