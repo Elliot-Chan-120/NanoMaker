@@ -12,4 +12,6 @@ build/
 .ipynb_checkpoints/
 .jupyter/
 src/database/BindingDB_All_202605_tsv.zip
+src/database/unique_pdb_cache.csv
+nano_notebooks/unique_pdb_cache.csv
 
