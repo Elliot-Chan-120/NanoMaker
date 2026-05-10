@@ -1,5 +1,5 @@
 AA_IDS = [
-    'A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y'
+    'A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y','VOID',
 ]
 
 # molecular weights are in kilodaltons
@@ -24,6 +24,7 @@ MOLECULAR_WEIGHTS = {
     'V': 0.12,
     'W': 0.20,
     'Y': 0.18,
+    'VOID': 0,
 }
 
 # net charges at physiological pH ~7.4
@@ -47,7 +48,8 @@ NET_CHARGES = {
     'T': 0,
     'V': 0,
     'W': 0,
-    'Y': 0
+    'Y': 0,
+    'VOID': 0,
 }
 
 # isoelectric point pHs from peptide web
@@ -72,7 +74,8 @@ ISOELECTRIC_PTS = {
     'T': 5.60,
     'V': 5.97,
     'W': 5.94,
-    'Y': 5.66
+    'Y': 5.66,
+    'VOID': 0,
 }
 
 # hydrophobicity levels - pH 7
@@ -99,7 +102,8 @@ HYDROPHOBICITY_IDXS = {
     'T': 13,
     'V': 76,
     'W': 97,
-    'Y': 63
+    'Y': 63,
+    'VOID': 0,
 }
 
 
@@ -124,7 +128,8 @@ HALF_LIFE = {
     'T': 7.2,
     'V': 100,
     'W': 2.8,
-    'Y': 2.8
+    'Y': 2.8,
+    'VOID': 0,
 }
 
 
@@ -151,4 +156,5 @@ FUNCTIONAL_FP = {
     "S": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
     "T": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
     "P": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    "VOID": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
