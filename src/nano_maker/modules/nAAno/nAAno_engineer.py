@@ -14,28 +14,28 @@
 # save this
 from nAAno_library import *
 
-class NAAnoEnc:
-    """Run this everytime we need a new set of embeddings"""
+class NAAnoEng:
+    """Run this everytime we need a new set of feature vectors"""
     def __init__(self, verbose=False):
         self.nAAno_emb = {}   # basically just make it easier to embed down the line
         self.verbose = verbose
 
     def initialize(self):
-        self.nAAno_emb = {aa_id: get_embedding(aa_id) for aa_id in AA_IDS}
+        self.nAAno_vectors = {aa_id: get_embedding(aa_id) for aa_id in AA_IDS}
 
         if self.verbose:
-            print("NAAnoEnc initialized")
+            print("NAAnoEng initialized")
         return True
 
-    def get_aa_id(self, emb_vector):
+    def get_aa_id(self, naano_vector):
         aa_id = None
-        for code, key in self.nAAno_emb.items():
-            if key == emb_vector:
+        for code, key in self.nAAno_vectors.items():
+            if key == naano_vector:
                 aa_id = code
                 break
 
         if aa_id is None:
-            raise ValueError(f"Embedding vector {emb_vector} presented does not exist")
+            raise ValueError(f"Feature vector {naano_vector} presented does not exist")
 
         return aa_id
 
@@ -53,28 +53,31 @@ def get_embedding(aa_id: str):
         raise ValueError(f"{aa_id} not in valid AA ID list")
 
     # embedding scheme, MAKE SURE TO UPDATE THIS IF YOU EVER UPDATE NAANOLIBRARY
-    embedding = [
+    naano_vector = [
         MOLECULAR_WEIGHTS[aa_id],
         NET_CHARGES[aa_id],
         ISOELECTRIC_PTS[aa_id],
         HYDROPHOBICITY_IDXS[aa_id],
         HALF_LIFE[aa_id],
     ]
-    embedding += FUNCTIONAL_FP[aa_id]
-    return embedding
+    naano_vector += FUNCTIONAL_FP[aa_id]
+    return naano_vector
 
 
-def encoder_check():
-    encoder = NAAnoEnc(verbose=True)
-    encoder.initialize()
-    for aa_code, aa_vect in encoder.nAAno_emb.items():
+def encoder_check(verbose=True):
+    module = NAAnoEng(verbose=True)
+    module.initialize()
+    for aa_code, aa_vect in module.nAAno_emb.items():
         print(f"{aa_code} -- {aa_vect}")
 
     # check decoder and encoder
     for aa in AA_IDS:
         aa_str = aa
         aa_emb = get_embedding(aa)
-        if aa_str == encoder.get_aa_id(aa_emb):
-            print(f"{aa_str}: str <-> vect aligned")
+        if aa_str == module.get_aa_id(aa_emb):
+            if verbose:
+                print(f"{aa_str}: str <-> vect aligned")
+        else:
+            raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
 
-# encoder_check()  # note: all good
+encoder_check()  # note: all good

@@ -4,6 +4,9 @@ import random
 import torch.nn.functional as F
 import ast
 
+from sympy import true
+
+
 class RAAdialSeeker:
 
     def __init__(self, resolution, verbose=False):
@@ -12,7 +15,7 @@ class RAAdialSeeker:
 
         self.angstrom_lim = 33   # maximum angstrom range found + some extra for context enrichment
                                  # can always edit this later on
-        self.angstrom_inc = float(8 / resolution)
+        self.angstrom_inc = float(33 / resolution)
         self.threshold = float(1 / resolution)  # standardize how we determine radial sequences
         #                           smallest distance is the base increment, not 0
         self.radius_levels = torch.arange(self.angstrom_inc, self.angstrom_lim + self.angstrom_inc, step=self.angstrom_inc)
@@ -58,11 +61,20 @@ class RAAdialSeeker:
         else:
             return False
 
-def test_resolution():
-    module = RAAdialSeeker(resolution = 1000)
+def test_resolution(verbose=True):
+    resolution = 1000
+    module = RAAdialSeeker(resolution=resolution)
     module.init_spAAtial()
-    print(module.hit_layer)
-    for level in module.radius_levels:
-        print(level)
+    hit_layer = module.hit_layer
+    radius_levels = module.radius_levels
 
-test_resolution()
+    if resolution == len(hit_layer) and len(hit_layer) == len(radius_levels):
+        if verbose:
+            print("RAAdialSeeker layers aligned")
+        return True
+    else:
+        if verbose:
+            print("RAAdialSeeker layers not aligned")
+        return False
+
+test_resolution(verbose=True)
