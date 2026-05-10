@@ -61,5 +61,7 @@ def mol_from_smiles(smiles):
 ## TEST BLOCK
 # test_smiles = "COc1nc(OC[C@H]2C[C@@H]2c2ccc3ncccc3n2)nc(NCc2cnn(C)c2)c1C |r|"
 # test_fp = mol_from_smiles(test_smiles)
-
-# test_fp  #array([1, 0, 1, ..., 0, 0, 0], shape=(1024,), dtype=uint8)
+# drug_like = eval_lipinski(test_smiles)
+#
+# print(drug_like)
+# print(test_fp)  #array([1, 0, 1, ..., 0, 0, 0], shape=(1024,), dtype=uint8)

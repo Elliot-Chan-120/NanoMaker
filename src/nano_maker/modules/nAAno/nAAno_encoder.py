@@ -14,20 +14,17 @@
 # save this
 from nAAno_library import *
 
-class NAAnoEncoder:
+class NAAnoEnc:
     """Run this everytime we need a new set of embeddings"""
     def __init__(self, verbose=False):
         self.nAAno_emb = {}   # basically just make it easier to embed down the line
         self.verbose = verbose
 
     def initialize(self):
-        AA_embs = {}
-        for aa_id in AA_IDS:
-            AA_embs[aa_id] = get_embedding(aa_id)
-        self.nAAno_emb = AA_embs
+        self.nAAno_emb = {aa_id: get_embedding(aa_id) for aa_id in AA_IDS}
 
         if self.verbose:
-            print("NAAnoEncoder initialized")
+            print("NAAnoEnc initialized")
         return True
 
     def get_aa_id(self, emb_vector):
@@ -68,7 +65,7 @@ def get_embedding(aa_id: str):
 
 
 def encoder_check():
-    encoder = NAAnoEncoder(verbose=True)
+    encoder = NAAnoEnc(verbose=True)
     encoder.initialize()
     for aa_code, aa_vect in encoder.nAAno_emb.items():
         print(f"{aa_code} -- {aa_vect}")
@@ -79,3 +76,5 @@ def encoder_check():
         aa_emb = get_embedding(aa)
         if aa_str == encoder.get_aa_id(aa_emb):
             print(f"{aa_str}: str <-> vect aligned")
+
+# encoder_check()  # note: all good
