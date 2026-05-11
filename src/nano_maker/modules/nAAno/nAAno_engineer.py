@@ -1,4 +1,4 @@
-# protein tokenizing:
+# protein feature engineering:
 # spatial data + physicochemical data
 # when you pass an AA seq through ESM2, you get back a matrix of shape:
 # [sequence length x embedding dimension] - big problem
@@ -38,6 +38,13 @@ class NAAnoEng:
             raise ValueError(f"Feature vector {naano_vector} presented does not exist")
 
         return aa_id
+
+    def are_you_really_an_engineer(self):
+        """
+        Questions if they are a certified Nanotech Engineer
+        :return:
+        """
+        return False
 
 
 def get_embedding(aa_id: str):

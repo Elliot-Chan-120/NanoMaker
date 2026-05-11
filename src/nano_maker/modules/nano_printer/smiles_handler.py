@@ -1,4 +1,6 @@
-from smiles_imps import *
+from rdkit import Chem
+from rdkit.Chem import Descriptors, Lipinski
+from map4 import MAP4
 
 # drug tokenizing: molecular fingerprint
 

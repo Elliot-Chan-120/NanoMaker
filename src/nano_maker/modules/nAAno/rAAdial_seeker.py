@@ -17,7 +17,7 @@ class RAAdialSeeker:
                                  # can always edit this later on
         self.angstrom_inc = float(33 / resolution)
         self.threshold = float(1 / resolution)  # standardize how we determine radial sequences
-        #                           smallest distance is the base increment, not 0
+        #                                 smallest distance is the base increment, not 0
         self.radius_levels = torch.arange(self.angstrom_inc, self.angstrom_lim + self.angstrom_inc, step=self.angstrom_inc)
 
         self.hit_layer = None  # [resolution, 2] -> on and off
@@ -46,10 +46,10 @@ class RAAdialSeeker:
         for level in self.radius_levels:
             radial_seq[level] = []
             for i in range(len(aa_seq)):
-                unique_radius = np.sqrt(sum(vect_seq[i] ** 2))
-                if self._dist_check(vect_seq[i], level) and (unique_radius not in seen):
+                num_id = (np.sqrt(sum(vect_seq[i] ** 2)), i)
+                if self._dist_check(vect_seq[i], level) and (num_id not in seen):
                     radial_seq[level].append([aa_seq[i], vect_seq[i]])
-                    seen.append(unique_radius)
+                    seen.append(num_id)
             if not radial_seq[level]:
                 radial_seq[level].append(['VOID', [0,0,0]])
 
