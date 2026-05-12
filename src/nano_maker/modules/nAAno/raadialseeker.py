@@ -1,58 +1,74 @@
 import numpy as np
 import torch
 
-class RAAdialSeeker:
+class RadialSeeker:
 
-    def __init__(self, resolution, verbose=False):
-        self.resolution = resolution
+    def __init__(self, radial_resolution, intrashell_resolution, max_angstroms,
+                 verbose=False):
+        self.radial_resolution = radial_resolution
+        self.angstrom_lim = max_angstroms   # maximum angstrom range found + some extra for context enrichment
+                                 # can always edit this later on
+        self.angstrom_inc = float(max_angstroms / radial_resolution)
+        self.threshold = self.angstrom_inc / 2 # standardize how we determine radial sequences
+        # getting half the angstrom increment will let us finely separate them
+
+        #                           smallest distance is the base increment, not 0
+        self.radius_levels = torch.arange(self.angstrom_lim, self.angstrom_inc, step= -1 * self.angstrom_inc)
+
+        self.intrashell_resolution = intrashell_resolution
+        self.intrashell_inc = max_angstroms / intrashell_resolution
+
         self.verbose = verbose
 
-        self.angstrom_lim = 33   # maximum angstrom range found + some extra for context enrichment
-                                 # can always edit this later on
-        self.angstrom_inc = float(33 / resolution)
-        self.threshold = float(1 / resolution)  # standardize how we determine radial sequences
-        #                           smallest distance is the base increment, not 0
-        self.radius_levels = torch.arange(self.angstrom_inc, self.angstrom_lim + self.angstrom_inc, step=self.angstrom_inc)
-
-        self.coord_layer = None # [1, 3] -> 3D vector
-
-    def init_spAAtial(self):
-        self._make_coord_layer()
-
-    def _make_coord_layer(self):
-        self.coord_layer = torch.randn(size=(1, 3))
 
     def radial_sequence(self, aa_seq, vect_seq):
-        radial_seq = {}  # lookup table
-        seen = []
+        # first order them by absolute distance to centroid
+        # then convert them to indices according to intra-shell resolution
+
+        # radial resolution determines how finely we want to order them
+        # shell resolution determines how finely in 3D space we represent them
+
+        radial_seq = []  # lookup table
+        seen = set()
 
         # sanity
         if len(aa_seq) != len(vect_seq):
             raise ValueError(f"string and vector sequences of {aa_seq} are different lengths")
 
         # iterate up resolution increments, if a molecule's coordinate is within like 1/resolution of an angstrom, append it's info
-        # its radius is now the unique ID, so if we stumble on it again its not duplicated
-        for level in self.radius_levels:
-            radial_seq[level] = []
-            for i in range(len(aa_seq)):
-                num_id = (np.sqrt(sum(vect_seq[i] ** 2)), i)
-                if self._dist_check(vect_seq[i], level) and (num_id not in seen):
-                    radial_seq[level].append([aa_seq[i], vect_seq[i]])
-                    seen.append(num_id)
+        # its (radius, pos index) is now the unique ID, so if we stumble on it again its not duplicated
+        for level in self.radius_levels: # go through all possible radius levels
+            for i in range(len(aa_seq)):  # go through all amino acids in that sequence
+                num_id=i
+                if num_id not in seen and self._dist_check(np.linalg.norm(vect_seq[i]), level):
+                    idx_vect = self.vect2idx(vect_seq[i])
+                    radial_seq.append([[aa_seq[i]], idx_vect])
+                    seen.add(num_id)
 
         # create two VOID tokens (0,0,0) on both sides to denote stops and starts
-        return [0, 0, 0] + radial_seq[::-1] + [0, 0, 0]  # we want to go from outside inward
+        return [[['VOID'],[0, 0, 0]]] + radial_seq + [[['VOID'],[0, 0, 0]]]  # we want to go from outside inward
 
-    def _dist_check(self, vector, ang_radius):
-        if abs(ang_radius - np.sqrt(sum(vector ** 2))) <= self.threshold:
+    def _dist_check(self, dist, ang_radius):
+        if abs(dist - ang_radius) <= self.threshold:
             return True
         else:
             return False
 
+    def vect2idx(self, vector):
+        """
+        Converts a torch.tensor of 3D vectors into their nearest shell-resolution's index
+        """
+        idxs = np.round(vector / self.intrashell_inc)
+        idxs = np.clip(idxs, -self.intrashell_resolution, self.intrashell_resolution)
+        return idxs.astype(int)
+
+    def idx2vect(self, idxs):
+        """Converts a torch.tensor of indexes back into their original 3D vectors"""
+        return idxs * self.intrashell_inc
+
+
 def test_resolution():
-    module = RAAdialSeeker(resolution = 100)
-    module.init_spAAtial()
+    module = RadialSeeker(radial_resolution = 100, intrashell_resolution = 100, max_angstroms = 33)
     for level in module.radius_levels:
         print(level)
-
-test_resolution()
+# test_resolution()  # all good

@@ -21,7 +21,7 @@ class NAAnoEng:
         self.verbose = verbose
 
     def initialize(self):
-        self.nAAno_vectors = {aa_id: get_embedding(aa_id) for aa_id in AA_IDS}
+        self.nAAno_vectors = {aa_id: get_nAAnoVector(aa_id) for aa_id in AA_IDS}
 
         if self.verbose:
             print("NAAnoEng initialized")
@@ -39,7 +39,7 @@ class NAAnoEng:
 
         return aa_id
 
-    def are_you_really_an_engineer(self):
+    def _are_you_really_an_engineer(self):
         """
         Questions if they are a certified Nanotech Engineer
         :return:
@@ -47,7 +47,7 @@ class NAAnoEng:
         return False
 
 
-def get_embedding(aa_id: str):
+def get_nAAnoVector(aa_id: str):
     """
     use this in these two scenarios:
     \n    - generating embeddings after updating feature vector
@@ -80,7 +80,7 @@ def encoder_check(verbose=True):
     # check decoder and encoder
     for aa in AA_IDS:
         aa_str = aa
-        aa_emb = get_embedding(aa)
+        aa_emb = get_nAAnoVector(aa)
         if aa_str == module.get_aa_id(aa_emb):
             if verbose:
                 print(f"{aa_str}: str <-> vect aligned")

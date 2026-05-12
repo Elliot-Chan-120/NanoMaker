@@ -20,4 +20,5 @@ nano_notebooks/notebook_database/AA3D_df.csv
 nano_notebooks/notebook_database/unique_smiles_strings.csv
 nano_notebooks/notebook_database/molfp_df.csv
 nano_notebooks/notebook_database/all_pairs_df.csv
+nano_notebooks/notebook_database/radial_seq_df.csv
 
