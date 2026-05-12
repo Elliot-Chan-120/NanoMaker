@@ -12,7 +12,7 @@
 # put stuff in nAAno_library for physicochemical analysis
 
 # save this
-from nAAno_library import *
+from naanolibrary import *
 
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
