@@ -46,7 +46,7 @@ class RadialSeeker:
                     seen.add(num_id)
 
         # create two VOID tokens (0,0,0) on both sides to denote stops and starts
-        return [[['VOID'],[0, 0, 0]]] + radial_seq + [[['VOID'],[0, 0, 0]]]  # we want to go from outside inward
+        return radial_seq + [[['VOID'],[0, 0, 0]]]  # we want to go from outside inward
 
     def _dist_check(self, dist, ang_radius):
         if abs(dist - ang_radius) <= self.threshold:
@@ -56,15 +56,19 @@ class RadialSeeker:
 
     def vect2idx(self, vector):
         """
-        Converts a torch.tensor of 3D vectors into their nearest shell-resolution's index
+        ENCODE: Converts a torch.tensor of 3D vectors into their nearest shell-resolution's index
         """
         idxs = np.round(vector / self.intrashell_inc)
         idxs = np.clip(idxs, -self.intrashell_resolution, self.intrashell_resolution)
         return idxs.astype(int)
 
-    def idx2vect(self, idxs):
-        """Converts a torch.tensor of indexes back into their original 3D vectors"""
-        return idxs * self.intrashell_inc
+    def num2vect(self, idxs):
+        """DECODE: Converts a torch.tensor of indexes into their max_Angstrom-scaled 3D vectors"""
+        vector = []
+        for number in idxs:
+            vector.append(float(number) * self.angstrom_inc)
+        return vector
+
 
 
 def test_resolution():
