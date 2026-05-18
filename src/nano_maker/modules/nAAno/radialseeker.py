@@ -60,7 +60,7 @@ class RadialSeeker:
         """
         idxs = np.round(vector / self.intrashell_inc)
         idxs = np.clip(idxs, -self.intrashell_resolution, self.intrashell_resolution)
-        return idxs.astype(int)
+        return idxs.astype(int).tolist()  # it's a pain to deal with numpy
 
     def num2vect(self, idxs):
         """DECODE: Converts a torch.tensor of indexes into their max_Angstrom-scaled 3D vectors"""
