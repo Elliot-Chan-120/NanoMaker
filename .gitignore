@@ -22,3 +22,5 @@ nano_notebooks/notebook_database/molfp_df.pkl
 nano_notebooks/notebook_database/SMILE_2_PDBhits.csv
 nano_notebooks/notebook_database/radial_seq_df.pkl
 
+nano_notebooks/notebook_database/test_pointers.parquet
+nano_notebooks/notebook_database/training_pointers.parquet

@@ -1,0 +1,1 @@
+This directory contains all the prototyping and data processing jupyter notebooks I used before utilizing them as actual scripts / modules in my src folder.

@@ -1,1 +1,0 @@
-If you generated the dataframes and csvs here, then you can just drag and drop them all into NT_data

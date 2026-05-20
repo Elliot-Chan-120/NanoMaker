@@ -1,6 +1,6 @@
 zerobind: protein-specific zero-shot predictor
 
-zero-shot = model preidcts properties on a protein it has never seen during training
+zero-shot = model predicts properties on a protein it has never seen during training
 few-shot = handful of examples (5-50) for a new protein before predicting
 
 most proteins in ChEMBL have few known ligands so the model will constantly face proteins it barely knows
@@ -27,4 +27,8 @@ main concern - most protein targets from BindingDB and ChEMBL are disease-releva
 completely different molecule designed for drug delivery or some sort of binding application, not pathogenicity
 
 Protein pocket patch design
-- design
+- 0.1nM Ki -> exceptionally high-affinity interaction pairs b/w ligand and protein pocket
+- significant data downscale, much better for what we have
+- high-affinity binding at sub 0.1 nM is almost always driven by precise geometric and electrostatic complementarity
+- isolates ligand-pocket pairs that are structurally determined to bind tightly
+- drug discovery campaigns routinely use 0.1nM as a threshold for defining a high quality hit worth optimizing
