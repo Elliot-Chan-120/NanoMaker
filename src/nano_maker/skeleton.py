@@ -18,24 +18,70 @@ from modules.nano_printer.smiles_handler import smiles_fingerprint
 from src.database.dataset import RadialDataset
 
 
-# RadialSeeker parameters used -> record these - might design a config file later
+# radial seeker module params
 radial_resolution = 100
 intrashell_resolution = 100
 max_angstroms = 33
 
-batch_size = 64  # how many data X X Ys we want to pass at a time
-block_size = 50  # coordinate context
-max_iters = 500
-eval_interval = 500
-learning_rate = 3e-4
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-eval_iters = 200
-n_embd = 128
+# model params
+block_size = 50
+batch_size = 500
+dropout=0.1
+n_embd = 256
 n_head = 4
-n_layer = 3
-dropout = 0.2
 map4_res = 1024
+learning_rate = 1e-3
+n_epochs = 2
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+torch.manual_seed(311104)
+
+
+# Load data
+# print(SMILE_2_PDBHITS.columns)  # 'SMILES', 'PDB_hits'
+# print(MOLECULAR_FINGERPRINTS.columns)  # 'smiles_str', 'map4_fp'
+# print(RADIAL_SEQUENCES.columns)  # 'PDB_ID', 'radial_sequence'
+
+from src.paths import *
+RADIAL_SEQUENCES = pd.read_pickle(DATABASE / "radial_seq_df.pkl")
+MOLECULAR_FINGERPRINTS = pd.read_pickle(DATABASE / "molfp_df.pkl")
+TRAIN_POINTER = pd.read_parquet(DATABASE / "training_pointers.parquet")
+TEST_POINTER = pd.read_parquet(DATABASE / "test_pointers.parquet")
+
+# training dataset
+training_dataset = RadialDataset(pointer=TRAIN_POINTER,
+                                 smiles_molfp=MOLECULAR_FINGERPRINTS,
+                                 pdb_radial=RADIAL_SEQUENCES,
+                                 block_size=block_size)
+from torch.utils.data import DataLoader
+loader = DataLoader(
+    training_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+    num_workers=4,
+    drop_last=True
+)
+
+# test / validation set
+test_set = RadialDataset(pointer=TEST_POINTER,
+                                 smiles_molfp=MOLECULAR_FINGERPRINTS,
+                                 pdb_radial=RADIAL_SEQUENCES,
+                                 block_size=block_size)
+from torch.utils.data import DataLoader
+test_loader = DataLoader(
+    test_set,
+    batch_size=batch_size,
+    num_workers=4,
+    shuffle=False,
+    drop_last=True
+)
+
+
+class NewGELU(nn.Module):  # might be worth looking into for this
+
+    def forward(self, x):
+        return 0.5, * x * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (x + 0.044715 * torch.pow(x, 3.0))))
 
 
 class Head(nn.Module):
@@ -160,7 +206,7 @@ class SkeletonModel(nn.Module):
         self.mol_encoder = nn.Sequential(
             nn.Linear(map4_res, int(map4_res//2)),
             nn.ReLU(),
-            nn.Linear(512, n_embd),
+            nn.Linear(int(map4_res//2), n_embd),
             nn.LayerNorm(n_embd)
         )
 
@@ -179,7 +225,7 @@ class SkeletonModel(nn.Module):
         """
         B, T, C = coord_hist.shape
         coordinate_emb = self.c_project(coord_hist.float() / self.radial_resolution)
-        pos_emb = self.pos_emb(torch.arange(T))
+        pos_emb = self.pos_emb(torch.arange(T, device=coord_hist.device))
         x = coordinate_emb + pos_emb
 
         mol_emb = self.mol_encoder(map4_enc.float()).unsqueeze(1)
@@ -196,7 +242,8 @@ class SkeletonModel(nn.Module):
 
     def generate(self, map4_enc, max_steps=130):
         # largest protein pocket in dataset was 107
-        coord_context = torch.zeros(1, block_size, 3)
+        map4_enc = map4_enc.to(device)
+        coord_context = torch.zeros(1, block_size, 3, device=map4_enc.device)
         coord_out = []
 
         for _ in range(max_steps):
@@ -206,3 +253,73 @@ class SkeletonModel(nn.Module):
 
 
         return coord_out
+
+
+
+# =====================================================================================================================
+model = SkeletonModel(n_embd=n_embd, n_head=n_head, block_size=block_size,
+                      map4_res=map4_res, radial_resolution=radial_resolution).to(device)
+optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+
+
+@torch.no_grad()
+def estimate_loss(model, loader, device, radial_res, max_batches=None):
+    model.eval()
+    total_loss = 0
+    n_batches = 0
+
+    for batch_idx, batch in enumerate(loader):
+        if max_batches and batch_idx >= max_batches:
+            break
+
+        map4_fp, radial_X, radial_Y = batch
+
+        map4_fp = map4_fp.to(device)
+        radial_X = radial_X.to(device)
+        radial_Y = radial_Y.to(device)
+
+        _, loss = model(radial_X, map4_fp, radial_Y)
+        total_loss += loss.item()
+        n_batches += 1
+
+    model.train()
+    return total_loss / n_batches
+
+
+def train(n_epochs):
+    for epoch in range(n_epochs):  # start with few epochs
+        total_loss = 0
+        for batch_idx, batch in enumerate(loader):
+            map4_fp, radial_X, radial_Y = batch
+
+            map4_fp = map4_fp.to(device)
+            radial_X = radial_X.to(device)
+            radial_Y = radial_Y.to(device)
+
+            optimizer.zero_grad()
+            pred, loss = model(radial_X, map4_fp, radial_Y)
+
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+
+            total_loss += loss.item()
+
+            if batch_idx % 50 == 0:
+                print(f"Epoch {epoch + 1} | Batch {batch_idx + 1} | Loss: {loss.item():.6f}")
+
+        train_loss = total_loss / len(loader)
+        val_loss = estimate_loss(model, test_loader, device, radial_res=radial_resolution, max_batches=batch_size)
+
+        print(f"Epoch {epoch + 1} | Train: {train_loss:.6f} | Val: {val_loss:.6f} | Gap: {val_loss - train_loss:.6f}")
+
+    return model
+
+
+def generate(smiles):
+    map4_tensor = torch.tensor(smiles_fingerprint(smiles), dtype=torch.float32).unsqueeze(0)
+    coordinates = model.generate(map4_tensor)
+    return coordinates
+
+
+train(n_epochs=n_epochs)

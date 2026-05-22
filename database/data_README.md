@@ -23,8 +23,10 @@ Download the above file, plug it in this folder and run the notebook cells.
 
 **Processed Data**
 - AA3D_df.csv -> for each PDB ID (where available) contains isolated protein pocket amino acid identities and their 3d vectors relative to their bound ligand centroid
+- SMILES_2_PDBhits.csv (all_pairs_df.csv in notebooks) -> for each processed unique PDB ID, lists each of its high-affinity SMILES hits
+
+The following files are available straight from the repo unlike the above which are obtained by running the jupyter notebook cells.
 - molfp_df.pkl -> molecular fingerprints for all unique SMILES
 - radial_seq_df.pkl -> radial sequences for all unique proteins (look at README.md)
-- SMILES_2_PDBhits.csv (all_pairs_df.csv in notebooks) -> for each processed unique PDB ID, lists each of its high-affinity SMILES hits
 - test and training pointers.parquet -> "pointer" files containing each high affinity pair's SMILES string and PDB_ID as well as all available window indexes for ease of downstream sampling
 

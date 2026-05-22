@@ -4,13 +4,14 @@ from torch.utils.data import Dataset
 class RadialDataset(Dataset):
 
     def __init__(self, pointer, smiles_molfp, pdb_radial,
-                 block_size):
+                 block_size, radial_resolution):
         self.pointer = pointer
         self.smiles_molfp = smiles_molfp.set_index("smiles_str")       # <class 'torch.Tensor'>
         self.pdb_radial = pdb_radial.set_index("PDB_ID")               # <class 'list'>
         # set index moves "column label" column to row label, enabling O(1) .loc["target_ID"] lookups
 
         self.block_size = block_size
+        self.radial_resolution = radial_resolution
 
 
     def __len__(self):
@@ -40,7 +41,8 @@ class RadialDataset(Dataset):
         """
         Generates X and Y set for a given radial sequence + molecular fingerprint in the background?
         """
-        context = [[0, 0, 0] for _ in range(self.block_size)]
+        o_num = int(self.radial_resolution + 1)
+        context = [[o_num, o_num, o_num] for _ in range(self.block_size)]
         for idx in range(len(radial_seq)):
             coords = radial_seq[idx][1]  # = [X, Y, Z]
             if idx == target_idx:
