@@ -81,3 +81,5 @@ def test_resolution():
     print(f"{test_vector} --Encode-- {t_v2ix}")
     print(f"{t_v2ix} --Decode-- {t_ix4v}")
 # test_resolution()  # all good
+
+# TODO: normalize to decimals later

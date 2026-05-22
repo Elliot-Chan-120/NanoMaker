@@ -43,7 +43,7 @@ def eval_lipinski(smiles):
     return rules_passed
 
 
-def mol_from_smiles(smiles):
+def smiles_fingerprint(smiles):
     """
     Extract molecular fingerprint from singular SMILES - fairly straightforward
     """

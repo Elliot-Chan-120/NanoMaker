@@ -3,24 +3,22 @@ from torch.utils.data import Dataset
 
 class RadialDataset(Dataset):
 
-    def __init__(self, test_pointer, train_pointer, smiles_molfp, pdb_radial,
-                 block_size, mode='train'):
-        self.test_pointer = test_pointer
-        self.train_pointer = train_pointer                             # when extracted:
+    def __init__(self, pointer, smiles_molfp, pdb_radial,
+                 block_size):
+        self.pointer = pointer
         self.smiles_molfp = smiles_molfp.set_index("smiles_str")       # <class 'torch.Tensor'>
         self.pdb_radial = pdb_radial.set_index("PDB_ID")               # <class 'list'>
         # set index moves "column label" column to row label, enabling O(1) .loc["target_ID"] lookups
 
         self.block_size = block_size
-        self.mode = mode if mode =='train' else 'test'
 
 
     def __len__(self):
-        return len(self.train_pointer) if self.mode == 'train' else len(self.test_pointer)
+        return len(self.pointer)
 
 
     def __getitem__(self, idx):
-        row = self.train_pointer.iloc[idx] if self.mode == 'train' else self.test_pointer.iloc[idx]
+        row = self.pointer.iloc[idx]
         smiles = row["SMILES"]
         pdb_id = row["PDB_HIT"]
         target_idx = row["WINDOW_IDX"]
