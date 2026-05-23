@@ -12,7 +12,7 @@ build/
 .ipynb_checkpoints/
 .jupyter/
 database/BindingDB_All_202605_tsv.zip
-src/database/unique_pdb_cache.csv
+src/nano_maker/modules/data_handling/unique_pdb_cache.csv
 src/nano_maker/container/nanogpt.py
 
 database/unique_pdb_cache.csv

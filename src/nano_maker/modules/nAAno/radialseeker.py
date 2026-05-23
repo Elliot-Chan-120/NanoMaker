@@ -44,7 +44,7 @@ class RadialSeeker:
                     radial_seq.append([[aa_seq[i]], idx_vect])
                     seen.add(num_id)
 
-        # create two VOID tokens (0,0,0) on both sides to denote stops and starts
+        # create VOID token (0,0,0) at the end of the sequence to denote a stop
         return radial_seq + [[['VOID'], [0, 0, 0]]]  # we want to go from outside inward
 
     def _dist_check(self, dist, ang_radius):
@@ -59,14 +59,14 @@ class RadialSeeker:
         """
         vector_a = np.array(vector) + self.angstrom_lim
         idxs = np.round(vector_a / (2 * self.intrashell_inc))
-        idxs = np.clip(idxs, 0, self.intrashell_resolution)
+        idxs = np.clip(idxs, 0, self.intrashell_resolution) + 1
         return idxs.astype(int).tolist()
 
     def num2vect(self, idxs):
         """DECODE: Converts a tensor of indexes into their max_Angstrom-scaled 3D vectors"""
         vector = []
         for number in idxs:
-            vector.append(float(number) * 2 * self.intrashell_inc - self.angstrom_lim)
+            vector.append(float(number) * 2 * self.intrashell_inc - self.angstrom_lim - 1)
         return vector
 
 
@@ -75,7 +75,7 @@ def test_resolution():
     for level in module.radius_levels:
         print(level)
 
-    test_vector = [0.6, 1.2, 23.69]
+    test_vector = [6.54, -9.2, 23.69]
     t_v2ix = module.vect2idx(test_vector)
     t_ix4v = module.num2vect(t_v2ix)
     print(f"{test_vector} --Encode-- {t_v2ix}")
