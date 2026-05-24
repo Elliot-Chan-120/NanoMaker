@@ -1,13 +1,25 @@
 import torch
 from torch.utils.data import Dataset
 
+import pyarrow.parquet as pq
+import pyarrow as pa
+import numpy as np
+import torch
+from torch.utils.data import Dataset
+
 class RadialDataset(Dataset):
 
-    def __init__(self, pointer, smiles_molfp, pdb_radial,
+    def __init__(self, pointer_path, smiles_molfp, pdb_radial,
                  block_size, radial_resolution):
-        self.pointer = pointer
-        self.smiles_molfp = smiles_molfp.set_index("smiles_str")       # <class 'torch.Tensor'>
-        self.pdb_radial = pdb_radial.set_index("PDB_ID")               # <class 'list'>
+        self.pointer = pq.ParquetFile(pointer_path)
+        self.table = pq.read_table(pointer_path, memory_map=True)
+
+        self.smiles_col = self.table.column("SMILES").combine_chunks()
+        self.pdb_col = self.table.column("PDB_HIT").combine_chunks()
+        self.window_col = self.table.column("WINDOW_IDX").combine_chunks()
+
+        self.smiles_molfp = smiles_molfp  # <class 'torch.Tensor'>
+        self.pdb_radial = pdb_radial      # <class 'list'>
         # set index moves "column label" column to row label, enabling O(1) .loc["target_ID"] lookups
 
         self.block_size = block_size
@@ -15,14 +27,13 @@ class RadialDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.pointer)
+        return len(self.table)
 
 
     def __getitem__(self, idx):
-        row = self.pointer.iloc[idx]
-        smiles = row["SMILES"]
-        pdb_id = row["PDB_HIT"]
-        target_idx = row["WINDOW_IDX"]
+        smiles = self.smiles_col[idx].as_py()
+        pdb_id = self.pdb_col[idx].as_py()
+        target_idx = self.window_col[idx].as_py()
 
         # context query
         molecular_fingerprint = self.smiles_molfp.loc[smiles, "map4_fp"]

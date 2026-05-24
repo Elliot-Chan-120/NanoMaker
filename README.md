@@ -1,4 +1,4 @@
-# Nano_Maker
+# Nano Maker: Protein Pocket Designer
 
 Important distinction between binding sites in terms of pathogenic resemblance.
 - pathogenic active / binding sites: exist within a pathogen + performs harmful function
