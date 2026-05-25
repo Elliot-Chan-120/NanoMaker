@@ -22,8 +22,8 @@ class SkeletonModel(nn.Module):
             nn.LayerNorm(n_embd)
         )
 
-
         self.stacks = nn.ModuleList([Stack(n_embd, n_head, block_size, dropout) for _ in range(n_layers)])
+
 
         # OUTPUT HEAD -> outputs coordinates
         self.ln_f = nn.LayerNorm(n_embd)
@@ -63,7 +63,7 @@ class SkeletonModel(nn.Module):
     def generate(self, map4_enc, max_AAs=130):
         # largest protein pocket in dataset was 107
         map4_enc = map4_enc.to(next(self.parameters()).device)
-        coord_context = torch.full((1, block_size, 3), float(self.radial_resolution * 1.5), device=map4_enc.device)
+        coord_context = torch.full((1, self.block_size, 3), float(self.radial_resolution * 1.5), device=map4_enc.device)
         coord_out = []
 
         for _ in range(max_AAs):
