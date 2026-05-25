@@ -21,9 +21,9 @@ Training split:
 - separate drugs by chemical similarity?
 - chemically disimilar drugs
 
-main concern - most protein targets from BindingDB and ChEMBL are disease-relevant therapeutic targets
+possible concern - most protein targets from BindingDB and ChEMBL are disease-relevant therapeutic targets
 - these are things drugs are designed to inhibit / modulate
-- big difference though, the binding sites might resemble pathogenic sites, but irl, they would be fused to a
+- big difference though, the binding sites might resemble pathogenic sites, but irl, they could be fused to a
 completely different molecule designed for drug delivery or some sort of binding application, not pathogenicity
 
 Protein pocket patch design

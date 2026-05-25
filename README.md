@@ -1,27 +1,43 @@
 # NanoMaker
-### A cross-attention protein pocket designer: adapt to any drug structure
 
-NanoMaker is a dual transformer-based system that, when presented with a chemical 
+---
+
+NanoMaker is a dual-transformer system that, when presented with a chemical 
 structure in SMILES format, generates a 3D spatial arrangement of amino acid residues' alpha carbons 
-that would form a high-affinity binding pocket.
+that would form a high-affinity binding pocket. 
+These can then be used as protein pocket patch templates for drug-delivery molecules.
 
-talk about radial shell 
-cross attention with learned map4 fingerprint embedding
-- condition 3D pocket generation on ligand identity
+NanoMaker separates the challenge of protein pocket design into two transformer tasks. 
+Skeleton creates the 3D spatial arrangement, the "skeleton", of the upcoming protein cage, 
+while NAAnoBot drops amino acids into that cage based on biochemical compatibility.
+Both transformers are cross-attention models conditioned on drug structure, 
+meaning that each protein cage is specific to that drug's properties.
+
+Protein binding pockets are characterized as "radial" sequences of coordinates ordered by decreasing shell radius
+and biochemical feature vectors. They are presented as such during training with the goal of autoregressively predicting the next set of vectors.
+e.g.
+```
+[['A'], [x1, y1, z1]], [['V'], [x2, y2, z2]] ....
+```
+Where each subsequent amino acid's radius to the ligand centroid decreases. Each amino acid identity is mapped to its specific feature vector downstream.
+
+## Data + Training
+Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a hybrid between Mean Squared Error and Shortest / Euclidian distance for both Skeleton and NAAnoBot.
+The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
+Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
+meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
 
-
-data is resolved protein-ligand complexes from PDB, loss defined as a hybrid between MSE and Euclidian distance
-training data = 14 million raining sequence windows
-validation set is comprised solely of molecules non-existent in training data -> model learns from actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization
-
-This project is an independent research prototype, build for learning and exploration.
+## Disclaimer + Note on Pathogenic Resemblance
+This project is an independent research prototype, built for learning and exploration.
+Generated protein pockets do not account for orientation of both the ligand or the amino acids themselves in 3D space.
 The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
-Generated pocket geometries should not be used to inform any protein design, clinical or therapeutic decisions.
+Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.
 
-Important distinction between binding sites in terms of pathogenic resemblance.
-- pathogenic active / binding sites: exist within a pathogen + performs harmful function
-- nano_maker-generated pockets: extracted as a sequence pattern and re-embedded IRL into a designed protein with a completely different context
+There may also exist the possibility that the pockets generated might resemble certain pathogenic molecules since that's what the training data comprised of.
+However, I should note that there is a distinction between:
+- Pathogenic active / binding sites: exist within a pathogen + performs harmful function, comprised of more complex structures
+- NanoMaker-generated pockets: 3D-designed pocket with the sole purpose of high binding affinity
 
 
 ## Skeleton: 3D structure generation
@@ -44,10 +60,15 @@ alpha carbon n: [ end ]
 
 ## NAANOBOT: Biochemical Environment Curation
 Model: NAANOBOT is responsible for deciding which amino acid belongs in certain coordinates.
-It actually doesn't "see" amino acid identities but rather their feature vectors curated
-by a feature engineering class "NanoEng", that characterizes each amino acid by their 
-physicochemical properties and their chemical structure(s) / functional group(s) that 
+It actually doesn't interpret sequences via amino acid identities but rather their feature vectors.
+Each aa is characterized by their physicochemical properties and chemical structure(s) / functional group(s) that 
 distinguish them from the rest. 
 
 This means that NAANOBOT doesn't say "Valine" or "Leucine" belongs here, instead it says
-"A protein with size X belongs here, and a protein with a Guanidium ring should be here and so on".
+"An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until the protein pocket is completed.
+
+
+## Generalization to Unseen Chemistry (after conducting tests on your datasets)
+As stated previously in the data section, 
+
+might be good to have this here
