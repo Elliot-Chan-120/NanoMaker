@@ -39,13 +39,6 @@ class NAAnoEng:
 
         return aa_id
 
-    def _are_you_really_an_engineer(self):
-        """
-        Questions if they are a certified Nanotech Engineer
-        :return:
-        """
-        return False
-
 
 def get_nAAnoVector(aa_id: str):
     """
