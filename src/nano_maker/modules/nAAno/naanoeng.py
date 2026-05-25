@@ -14,6 +14,16 @@
 # save this
 from naanolibrary import *
 
+# protein feature engineering:
+# spatial data + physicochemical data
+# when you pass an AA seq through ESM2, you get back a matrix of shape:
+# [sequence length x embedding dimension] - big problem
+# each row is a per-residue embedding, a vector that encodes that AA's...
+# - identity, local chemical environment, inferred structural context as a vector
+# add parts of GEM to append a physiochemical vector on top of spatial one
+# - charge, hydrophobicity, pKa, H-bond capacity, .etc
+# GEM properties = nAAno_token
+
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
     def __init__(self, verbose=False):
@@ -69,17 +79,17 @@ def build_nAAnoVector(aa_id: str):
 def encoder_check(verbose=True):
     module = NAAnoEng(verbose=True)
     module.initialize()
-    for aa_code, aa_vect in module.nAAno_emb.items():
+    for aa_code, aa_vect in module.nAAno_vectors.items():
         print(f"{aa_code} -- {aa_vect}")
 
     # check decoder and encoder
     for aa in AA_IDS:
         aa_str = aa
-        aa_emb = get_nAAnoVector(aa)
+        aa_emb = module.get_nAAnovector(aa)
         if aa_str == module.get_aa_id(aa_emb):
             if verbose:
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
 
-encoder_check()  # note: all good
+# encoder_check()  # note: all good

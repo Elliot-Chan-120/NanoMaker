@@ -6,12 +6,12 @@ import pandas as pd
 # SKELETON MODEL
 class SkeletonModel(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
-                 map4_res, radial_resolution,
+                 map4_res, max_angstroms,
                  l_a, dropout):
         super().__init__()
         self.block_size = block_size
         self.map4_res = map4_res
-        self.radial_resolution = radial_resolution
+        self.max_angstroms = max_angstroms
 
         self.c_project = nn.Linear(3, n_embd)  # feed coordinates here
         self.pos_emb = nn.Embedding(block_size, n_embd)
@@ -22,8 +22,8 @@ class SkeletonModel(nn.Module):
             nn.LayerNorm(n_embd)
         )
 
-        self.stacks = nn.ModuleList([Stack(n_embd, n_head, block_size, dropout) for _ in range(n_layers)])
 
+        self.stacks = nn.ModuleList([Stack(n_embd, n_head, block_size, dropout) for _ in range(n_layers)])
 
         # OUTPUT HEAD -> outputs coordinates
         self.ln_f = nn.LayerNorm(n_embd)
@@ -48,30 +48,44 @@ class SkeletonModel(nn.Module):
         for stack in self.stacks:
             x = stack(x, mol_emb)
 
-        output_coords = torch.sigmoid(self.c_head(self.ln_f(x[:, -1, :]))) * (self.radial_resolution + 1)
+        r, az, pl = self.c_head(self.ln_f(x[:, -1, :])).unbind(dim=1)
+        r = F.softplus(r)                 # clip off negative values
+        az = torch.tanh(az) * torch.pi    # prevent outputs from being nonsensical angles
+        pl = torch.sigmoid(pl) * torch.pi
 
+        output = torch.stack([r, az, pl], dim=1)
+
+        # circular loss
         loss = None
         if targets is not None:
-            targets = targets.float()
-            mse_loss = F.mse_loss(output_coords, targets)
-            euc_loss = torch.sqrt(((output_coords - targets)**2).sum(dim=-1) + 1e-8).mean()  # euclidean distance between the two
+            Xrad, Xazm, Xplr = output.unbind(dim=1)
+            Yrad, Yazm, Yplr = targets.unbind(dim=1)
 
-            loss = mse_loss * 0.5 + euc_loss * 0.5
+            radial_loss = F.mse_loss(Xrad, Yrad)  # linear scale
+            azm_loss = self.circle_loss(Xazm, Yazm)
+            pol_loss = self.circle_loss(Xplr, Yplr)
 
-        return output_coords, loss
+            loss = (radial_loss * 0.5) + (azm_loss * 0.25) + (pol_loss * 0.25)
+
+        return output, loss
+
+    def circle_loss(self, aX, aY):
+        return ((torch.cos(aX) - torch.cos(aY))**2 + (torch.sin(aX) - torch.sin(aY))**2).mean()
+
 
     def generate(self, map4_enc, max_AAs=130):
         # largest protein pocket in dataset was 107
         map4_enc = map4_enc.to(next(self.parameters()).device)
-        coord_context = torch.full((1, self.block_size, 3), float(self.radial_resolution * 1.5), device=map4_enc.device)
+        coord_context = torch.tensor([[self.max_angstroms * 1.5, 0, 0] for _ in range(self.block_size)]).unsqueeze(0).to(map4_enc.device)
+
         coord_out = []
 
         for _ in range(max_AAs):
             next_coord, _ = self.forward(coord_context, map4_enc)
-            coord_out.append(next_coord)
+            coord_out.append(next_coord.detach())
             coord_context = torch.cat([coord_context[:, 1:, :], next_coord.unsqueeze(1)], dim=1)
 
-        return coord_out
+        return torch.stack(coord_out, dim=1).squeeze(0)
 
 
 class Head(nn.Module):
