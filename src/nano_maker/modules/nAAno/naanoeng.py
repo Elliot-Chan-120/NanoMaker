@@ -17,11 +17,10 @@ from naanolibrary import *
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
     def __init__(self, verbose=False):
-        self.nAAno_emb = {}   # basically just make it easier to embed down the line
         self.verbose = verbose
 
     def initialize(self):
-        self.nAAno_vectors = {aa_id: get_nAAnoVector(aa_id) for aa_id in AA_IDS}
+        self.nAAno_vectors = {aa_id: build_nAAnoVector(aa_id) for aa_id in AA_IDS}
 
         if self.verbose:
             print("NAAnoEng initialized")
@@ -39,8 +38,11 @@ class NAAnoEng:
 
         return aa_id
 
+    def get_nAAnovector(self, aa_id):
+        return self.nAAno_vectors[aa_id]
 
-def get_nAAnoVector(aa_id: str):
+
+def build_nAAnoVector(aa_id: str):
     """
     use this in these two scenarios:
     \n    - generating embeddings after updating feature vector

@@ -10,7 +10,7 @@ from torch.utils.data import Dataset
 class RadialDataset(Dataset):
 
     def __init__(self, pointer_path, smiles_molfp, pdb_radial,
-                 block_size, radial_resolution):
+                 block_size, max_angstroms):
         self.pointer = pq.ParquetFile(pointer_path)
         self.table = pq.read_table(pointer_path, memory_map=True)
 
@@ -23,8 +23,7 @@ class RadialDataset(Dataset):
         # set index moves "column label" column to row label, enabling O(1) .loc["target_ID"] lookups
 
         self.block_size = block_size
-        self.radial_resolution = radial_resolution
-
+        self.max_angstroms = max_angstroms
 
     def __len__(self):
         return len(self.table)
@@ -52,7 +51,7 @@ class RadialDataset(Dataset):
         """
         Generates X and Y set for a given radial sequence + molecular fingerprint in the background?
         """
-        o_num = int(self.radial_resolution * 1.5)  # max range + 1
+        o_num = int(self.max_angstroms * 1.5)  # max range + 1
         context = [[o_num, o_num, o_num] for _ in range(self.block_size)]
         for idx in range(len(radial_seq)):
             coords = radial_seq[idx][1]  # = [X, Y, Z]
