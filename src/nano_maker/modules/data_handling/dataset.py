@@ -45,7 +45,7 @@ class RadialDataset(Dataset):
         """
         Generates X and Y set for a given radial sequence + molecular fingerprint in the background?
         """
-        r_pad = int(self.max_angstroms * 1.5)  # max range + 1
+        r_pad = int(self.max_angstroms)  # model starts at max radius looking "in"
         az_pad = 0
         pl_pad = 0
         context = [[r_pad, az_pad, pl_pad] for _ in range(self.block_size)]

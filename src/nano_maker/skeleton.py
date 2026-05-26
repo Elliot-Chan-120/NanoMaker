@@ -7,7 +7,7 @@ import pandas as pd
 class SkeletonModel(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
                  map4_res, max_angstroms,
-                 l_a, dropout):
+                 dropout):
         super().__init__()
         self.block_size = block_size
         self.map4_res = map4_res
@@ -15,12 +15,7 @@ class SkeletonModel(nn.Module):
 
         self.c_project = nn.Linear(3, n_embd)  # feed coordinates here
         self.pos_emb = nn.Embedding(block_size, n_embd)
-        self.mol_encoder = nn.Sequential(
-            nn.Linear(map4_res, int(map4_res//2)),
-            nn.ReLU(),
-            nn.Linear(int(map4_res//2), n_embd),
-            nn.LayerNorm(n_embd)
-        )
+        self.mol_encoder = MolecularEncoder(n_embd, map4_res, dropout)
 
 
         self.stacks = nn.ModuleList([Stack(n_embd, n_head, block_size, dropout) for _ in range(n_layers)])
@@ -28,8 +23,6 @@ class SkeletonModel(nn.Module):
         # OUTPUT HEAD -> outputs coordinates
         self.ln_f = nn.LayerNorm(n_embd)
         self.c_head = nn.Linear(n_embd, 3)
-
-        self.loss_alpha = l_a
 
 
     def forward(self, coord_hist, map4_enc, targets=None):
@@ -198,3 +191,47 @@ class Stack(nn.Module):
         x = x + self.catt_head(self.ln2(x), mol_emb)
         x = x + self.ffwd(self.ln3(x))
         return x
+
+
+class MolecularEncoder(nn.Module):
+    def __init__(self, n_embd, map4_res, dropout):
+        super().__init__()
+
+        self.block1 = nn.Sequential(
+            nn.Linear(map4_res, map4_res),
+            nn.LayerNorm(map4_res),
+            nn.GELU(),
+            nn.Dropout(dropout)
+        )
+        self.check1 = nn.Linear(map4_res, map4_res // 2)
+
+        self.block2 = nn.Sequential(
+            nn.Linear(map4_res // 2, map4_res // 2),
+            nn.LayerNorm(map4_res // 2),
+            nn.GELU(),
+            nn.Dropout(dropout)
+        )
+        self.check2 = nn.Linear(map4_res // 2, n_embd)
+        self.residual1 = nn.Linear(map4_res, map4_res // 2)
+
+        self.block3 = nn.Sequential(
+            nn.Linear(n_embd, n_embd),
+            nn.LayerNorm(n_embd),
+            nn.GELU(),
+            nn.Dropout(dropout)
+        )
+        self.residual2 = nn.Linear(map4_res // 2, n_embd)
+
+
+        self.output = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        x1 = self.block1(x) + x
+        x1_down = self.check1(x1)
+
+        x2 = self.block2(x1_down) + self.residual1(x1)
+        x2_down = self.check2(x2)
+
+        x3 = self.block3(x2_down) + self.residual2(x2)
+
+        return self.output(x3)
