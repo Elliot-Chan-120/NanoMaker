@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pandas as pd
 
+# refer to notes to clear up gaps in understanding this
+
 # SKELETON MODEL
 class SkeletonModel(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
@@ -48,7 +50,8 @@ class SkeletonModel(nn.Module):
 
         output = torch.stack([r, az, pl], dim=1)
 
-        # circular loss
+        # circular loss instead of regular coordinate MSE
+        # doesn't make sense to convert to xyz so I'll use circular loss and radius MSE
         loss = None
         if targets is not None:
             Xrad, Xazm, Xplr = output.unbind(dim=1)
@@ -63,13 +66,19 @@ class SkeletonModel(nn.Module):
         return output, loss
 
     def circle_loss(self, aX, aY):
+        # this is calculating the distance between two angles on the unit circle
         return ((torch.cos(aX) - torch.cos(aY))**2 + (torch.sin(aX) - torch.sin(aY))**2).mean()
 
 
     def generate(self, map4_enc, max_AAs=130):
         # largest protein pocket in dataset was 107
         map4_enc = map4_enc.to(next(self.parameters()).device)
-        coord_context = torch.tensor([[self.max_angstroms * 1.5, 0, 0] for _ in range(self.block_size)]).unsqueeze(0).to(map4_enc.device)
+
+        # may 26 -> empty outer context pad / "token" = max_angstroms, neutral azimuth, neutral polar
+        # -> inner stop "token" is 0 0 0
+        # ok changing this after downloading the weights doesn't matter - separate from inference logic
+        # max angstroms is actually ~5 angstroms past the max in the dataset, so the relationship is still clear
+        coord_context = torch.tensor([[self.max_angstroms, 0, 0] for _ in range(self.block_size)]).unsqueeze(0).to(map4_enc.device)
 
         coord_out = []
 
@@ -80,7 +89,7 @@ class SkeletonModel(nn.Module):
 
         return torch.stack(coord_out, dim=1).squeeze(0)
 
-
+# most of the stuff below is from the nanoGPT file except the nanogpt and molecular encoder
 class Head(nn.Module):
     def __init__(self, n_embd, head_size, block_size, dropout):
         super().__init__()
@@ -193,6 +202,8 @@ class Stack(nn.Module):
         return x
 
 
+# previously was way too simple of an MLP, added in more layers
+# consider upgrading to use ChemBERTa and save embeddings as vectors to feed in to cross-attention
 class MolecularEncoder(nn.Module):
     def __init__(self, n_embd, map4_res, dropout):
         super().__init__()

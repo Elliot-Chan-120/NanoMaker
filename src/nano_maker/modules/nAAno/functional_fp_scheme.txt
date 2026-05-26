@@ -27,7 +27,7 @@ AAs that didn't have anything special going on (nonpolar) were all 0s, (non-)pol
     - L, I, V
 12 Hydroxyl
     - Y, S, T
-13 5-membered ring
+13 5-membered ring, 
     - P
 
 

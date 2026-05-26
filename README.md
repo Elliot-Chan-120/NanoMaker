@@ -13,13 +13,17 @@ while NAAnoBot drops amino acids into that cage based on biochemical compatibili
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein cage is specific to that drug's properties.
 
-Protein binding pockets are characterized as "radial" sequences of coordinates ordered by decreasing shell radius
-and biochemical feature vectors. They are presented as such during training with the goal of autoregressively predicting the next set of vectors.
-e.g.
+Protein binding pockets are characterized as "radial" sequences of spherical coordinates ordered by decreasing shell radius
+and biochemical feature vectors. The fineness of ordering is determined by a "radial_resolution" parameter (default 100). 
+Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
 ```
-[['A'], [x1, y1, z1]], [['V'], [x2, y2, z2]] ....
+[[['A'], [rad1, az1, pl1]], [['V'], [rad2, az2, pl2]] .... [['VOID'], [0, 0, 0]]]
+         # radius, azimuth, polar                            # end "tokens"
 ```
-Where each subsequent amino acid's radius to the ligand centroid decreases. Each amino acid identity is mapped to its specific feature vector downstream.
+Coordinates consist of radius value in angstroms, azimuth and polar angles computed from relative XYZ values. 
+Each subsequent amino acid's radius to the ligand centroid decreases. 
+Each amino acid identity is mapped to its specific feature vector downstream.
+Since protein cage generation is out->in, I interpreted hitting a radius of 0 and under is equivalent to encountering an "END" token in Natural Language Processing.
 
 ## Data + Training
 Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a hybrid between Mean Squared Error and Shortest / Euclidian distance for both Skeleton and NAAnoBot.
@@ -45,14 +49,14 @@ Model: Skeleton is responsible for generating the 3D spatial arrangement of the 
 prior to the amino acid insertion into said pocket, hence the name "Skeleton". 
 
 When presented with a chemical compound, it will say: "the protein cage surrounding this 
-molecule should look like this". It then generates a series of 3D vectors corresponding to an undefined amino acid's alpha carbon
-coordinates relative to the chemical compound's centroid (geometric center).
+molecule should look like this". It then generates a series of spherical coordinate vectors corresponding to an undefined 
+amino acid's alpha carbon's placement relative to the chemical compound's centroid (geometric center).
 
 e.g.
 ```
-alpha carbon 1: [55, 40, 64]
-alpha carbon 2: [33, 21, 57]
-alpha carbon 3: [43, 37, 39]
+alpha carbon 1: [14.13, -1.043, 1.56]
+alpha carbon 2: [14.00, -1.95, 1.40]
+alpha carbon 3: [13.8, -2.44, 1.53]
 ...
 alpha carbon n: [ end ]
 ```
@@ -68,7 +72,9 @@ This means that NAANOBOT doesn't say "Valine" or "Leucine" belongs here, instead
 "An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until the protein pocket is completed.
 
 
-## Generalization to Unseen Chemistry (after conducting tests on your datasets)
-As stated previously in the data section, 
+## todo: Generalization to Unseen Chemistry (after conducting tests on datasets)
+As stated previously in the data section, the validation data split consisted not of 20-30% of XY data points, but rather
+unseen SMILES that would then produce said XY data points. This was done to "encourage" potential zero-shot capabilities
+for new molecules.
 
-might be good to have this here
+might be good to have this here later on 
