@@ -1,10 +1,8 @@
 # NanoMaker
 
 ---
-
-NanoMaker is a dual-transformer system that, when presented with a chemical 
-structure in SMILES format, generates a 3D spatial arrangement of amino acid residues' alpha carbons 
-that would form a high-affinity binding pocket. 
+A two-stage cross-attention transformer system that generates a 3D cage of amino acid residues' alpha carbons 
+that would form a high-affinity binding pocket to any given chemical in SMILES format. 
 These can then be used as protein pocket patch templates for drug-delivery molecules.
 
 NanoMaker separates the challenge of protein pocket design into two transformer tasks. 
@@ -26,7 +24,7 @@ Each amino acid identity is mapped to its specific feature vector downstream.
 Since protein cage generation is out->in, I interpreted hitting a radius of 0 and under is equivalent to encountering an "END" token in Natural Language Processing.
 
 ## Data + Training
-Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a hybrid between Mean Squared Error and Shortest / Euclidian distance for both Skeleton and NAAnoBot.
+Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle distance for Skeleton. NAAnoBot's loss is (not defined right now) composed of a hybrid between MSE and Euclidean distance between feature vectors.
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
@@ -58,7 +56,7 @@ alpha carbon 1: [14.13, -1.043, 1.56]
 alpha carbon 2: [14.00, -1.95, 1.40]
 alpha carbon 3: [13.8, -2.44, 1.53]
 ...
-alpha carbon n: [ end ]
+alpha carbon n: [0, 0, 0]
 ```
 
 

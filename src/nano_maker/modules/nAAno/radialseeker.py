@@ -15,7 +15,7 @@ import torch
 # put stuff in nAAno_library for physicochemical analysis
 
 # save this
-from naanolibrary import *
+from src.nano_maker.modules.nAAno.naanolibrary import *
 
 # protein feature engineering:
 # spatial data + physicochemical data
