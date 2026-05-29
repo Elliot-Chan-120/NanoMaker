@@ -11,17 +11,24 @@ while NAAnoBot drops amino acids into that cage based on biochemical compatibili
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein cage is specific to that drug's properties.
 
+|                  Pocket "skeleton"                   |              Full Pocket with Amino Acids              |
+|:----------------------------------------------------:|:------------------------------------------------------:|
+| ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
+
 Protein binding pockets are characterized as "radial" sequences of spherical coordinates ordered by decreasing shell radius
 and biochemical feature vectors. The fineness of ordering is determined by a "radial_resolution" parameter (default 100). 
+This can conceptually visualized as such. 
+![what_NanoMaker_sees.png](images/what_NanoMaker_sees.png)
+
 Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
 ```
-[[[AA_vector_1], [rad1, az1, pl1]], [[AA_vector_2], [rad2, az2, pl2]] .... [[VOID (all 0s)], [0, 0, 0]]]
+[[[AA identity 1], [rad1, az1, pl1]], [[AA identity 2], [rad2, az2, pl2]] .... [[VOID], [0, 0, 0]]]
          # radius, azimuth, polar                            # end "tokens"
 ```
 Coordinates consist of radius value in angstroms, azimuth and polar angles computed from relative XYZ values. 
 Each subsequent amino acid's radius to the ligand centroid decreases. 
-Each amino acid identity is mapped to its specific feature vector downstream.
-Since protein cage generation is out->in, I interpreted hitting a radius of 0 and under is equivalent to encountering an "END" token in Natural Language Processing.
+Each amino acid identity is mapped to its hand-curated unique biochemical feature vector downstream.
+Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
 
 ## Data + Training
 Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle distance for Skeleton. NAAnoBot's loss is (not defined right now) composed of a hybrid between MSE and Euclidean distance between feature vectors.
@@ -29,17 +36,17 @@ The data split was done according to drug identity rather than a random split af
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
+## Loss
+Each model went through 3 epochs across the same train / validation drug identity split.
 
-## Disclaimer + Note on Pathogenic Resemblance
-This project is an independent research prototype, built for learning and exploration.
-Generated protein pockets do not account for orientation of both the ligand or the amino acids themselves in 3D space.
-The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
-Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.
+Skeleton:
 
-There may also exist the possibility that the pockets generated might resemble certain pathogenic molecules since that's what the training data comprised of.
-However, I should note that there is a distinction between:
-- Pathogenic active / binding sites: exist within a pathogen + performs harmful function, comprised of more complex structures
-- NanoMaker-generated pockets: 3D-designed pocket with the sole purpose of high binding affinity
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+|---------|-------------|------------------|-----------|
+| Initial | 44.884      | n/a              | n/a       |
+| 1       | 0.618       | 0.388            | -0.23     |
+| 2       | 0.398       | 0.262            | -0.14     |
+| 3       | 0.285       | 0.232            | -0.053    |
 
 
 ## Skeleton: 3D structure generation
@@ -78,7 +85,8 @@ Each aa is characterized by their physicochemical properties and chemical struct
 distinguish them from the rest. 
 
 This means that NAANOBOT doesn't say "Valine" or "Leucine" belongs here, instead it says
-"An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until the protein pocket is completed.
+"An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until
+the protein pocket is completed.
 
 
 ## todo: Generalization to Unseen Chemistry (after conducting tests on datasets)
@@ -87,3 +95,15 @@ unseen SMILES that would then produce said XY data points. This was done to "enc
 for new molecules.
 
 might be good to have this here later on 
+
+
+## Disclaimer + Note on Pathogenic Resemblance
+This project is an independent research prototype, built for learning and exploration.
+Generated protein pockets do not account for orientation of both the ligand or the amino acids themselves in 3D space.
+The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
+Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.
+
+There may also exist the possibility that the pockets generated might resemble certain pathogenic molecules since that's what the training data comprised of.
+However, I should note that there is a distinction between:
+- Pathogenic active / binding sites: exist within a pathogen + performs harmful function, comprised of more complex structures
+- NanoMaker-generated pockets: 3D-designed pocket with the sole purpose of high binding affinity
