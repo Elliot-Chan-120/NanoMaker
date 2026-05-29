@@ -1,33 +1,39 @@
 # NanoMaker
 
 ---
-A two-stage cross-attention transformer system that generates a 3D cage of amino acid residues' alpha carbons 
+A dual cross-attention transformer system that generates a 3D cage of amino acid residues' alpha carbons 
 that would form a high-affinity binding pocket to any given chemical in SMILES format. 
 These can then be used as protein pocket patch templates for drug-delivery molecules.
 
 NanoMaker separates the challenge of protein pocket design into two transformer tasks. 
-Skeleton creates the 3D spatial arrangement, the "skeleton", of the upcoming protein cage, 
-while NAAnoBot slots amino acids into the empty coordinates based on biochemical compatibility.
+Model 1, "Skeleton", creates the 3D spatial arrangement / skeleton of the upcoming protein cage, 
+while model 2, "NAAnoBot", slots amino acids into the empty coordinates based on biochemical compatibility.
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein cage is specific to that drug's properties.
 
-I've drawn out an example skeleton and its populated final form.
-On the left we see a system of linked empty nodes representing amino acid slots forming a cage around the ligand centroid.
-In the drawing on the right I've filled in those nodes with amino acids, completing the protein binding pocket.
+I've drawn out an example skeleton and its populated final form:
 
 |             3D arrangement / "skeleton"              |            Full NanoMaker-generated pocket             |
 |:----------------------------------------------------:|:------------------------------------------------------:|
 | ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
+
+On the left we see a system of linked empty nodes representing amino acid slots forming a cage around the ligand centroid.
+In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
+
+Note: "Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
+
 ---
 
-## "Radial" sequencing
-I've characterized 3D protein binding pockets as "radial" sequences of spherical coordinates ordered by decreasing shell radius
-and biochemical feature vectors. The fineness of the ordering is determined by a "radial_resolution" parameter (default 100). 
+## "Radial" Sequencing
+I imagined the space around an arbitary drug centroid as a series of spherical shells, with each sequential shell's radius increasing. 
+Think of a glass ball within a glass ball many times over, with the outermost glass ball being the largest and vice versa.
+I've characterized 3D protein binding pockets as "radial" sequences of AA identities and their spherical coordinates ordered by decreasing shell radius. 
+The fineness of the ordering is determined by a "radial_resolution" parameter (default 100, so 100 shells or glass balls). 
 I've attempted to draw and visualize my conceptualization of this here:
 
 |   Protein pocket to "radial_sequence" visualization    |
 |:------------------------------------------------------:|
-| <img src="images/what_NanoMaker_sees.png" width="400"> |
+| <img src="images/what_NanoMaker_sees.png" width="700"> |
 
 
 Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
@@ -36,18 +42,27 @@ Resulting "radial sequences" are presented as such during training with the goal
          # radius, azimuth, polar                            # end "tokens"
 ```
 Coordinates consist of radius value in angstroms, azimuth and polar angles computed from relative XYZ values. 
-Each subsequent amino acid's radius to the ligand centroid decreases. 
+
+**Sequencing Concept Logic:**
+Imagine an observer object exploring the entire protein pocket space shell by shell, recording each subsequent amino 
+acid's (decreasing) radius to the ligand centroid until the last amino acid's data is recorded.
+The very end of each sequence is padded with a "VOID" identity and a spherical coordinate of zeros, which conceptually 
+is the "end" of the sequence as that's where the ligand centroid is and a protein absolutely cannot exist there.
+
 Each amino acid identity is mapped to its hand-curated unique biochemical feature vector downstream.
 Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
+---
 
 ## Data + Training
 Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle distance for Skeleton. NAAnoBot's loss is (not defined right now) composed of a hybrid between MSE and Euclidean distance between feature vectors.
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
+---
 
-## Loss
+## Model Performance and Loss
 Each model went through 3 epochs across the same train / validation drug identity split.
+Training loss was computed as a running average over all batches. 
 
 Skeleton:
 
@@ -57,7 +72,7 @@ Skeleton:
 | 1       | 0.618       | 0.388            | -0.23     |
 | 2       | 0.398       | 0.262            | -0.14     |
 | 3       | 0.285       | 0.232            | -0.053    |
-
+---
 
 ## Skeleton: 3D structure generation
 Model: Skeleton is responsible for generating the 3D spatial arrangement of the protein pocket
@@ -97,6 +112,7 @@ distinguish them from the rest.
 This means that NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says
 "An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until
 the protein pocket is completed.
+---
 
 
 ## todo: Generalization to Unseen Chemistry (after conducting tests on datasets)
