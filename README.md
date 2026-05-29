@@ -17,7 +17,7 @@ I've drawn out an example skeleton and its populated final form:
 |:----------------------------------------------------:|:------------------------------------------------------:|
 | ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
 
-On the left we see a system of linked empty nodes representing amino acid slots forming a cage around the ligand centroid.
+On the left we see a system of linked empty nodes representing amino acid slots forming a cage around the ligand centroid (geometric center).
 In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
 
 Note: "Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
@@ -51,6 +51,7 @@ is the "end" of the sequence as that's where the ligand centroid is and a protei
 
 Each amino acid identity is mapped to its hand-curated unique biochemical feature vector downstream.
 Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
+
 ---
 
 ## Data + Training
@@ -58,6 +59,7 @@ Data is resolved protein-drug complexes from BindingDB and PDB, with loss define
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
+
 ---
 
 ## Model Performance and Loss
@@ -72,6 +74,7 @@ Skeleton:
 | 1       | 0.618       | 0.388            | -0.23     |
 | 2       | 0.398       | 0.262            | -0.14     |
 | 3       | 0.285       | 0.232            | -0.053    |
+
 ---
 
 ## Skeleton: 3D structure generation
@@ -80,7 +83,7 @@ prior to the amino acid insertion into said pocket, hence the name "Skeleton".
 
 When presented with a chemical compound, it will say: "the protein cage surrounding this 
 molecule should look like this". It then generates a series of spherical coordinate vectors corresponding to an undefined 
-amino acid's alpha carbon's placement relative to the chemical compound's centroid (geometric center).
+amino acid's alpha carbon's placement relative to the chemical compound's centroid.
 
 note: alpha carbon = main carbon of amino acid
 
@@ -112,6 +115,7 @@ distinguish them from the rest.
 This means that NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says
 "An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until
 the protein pocket is completed.
+
 ---
 
 
