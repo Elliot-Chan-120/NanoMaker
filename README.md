@@ -93,7 +93,7 @@ alpha carbon 1: [14.13, -1.043, 1.56]
 alpha carbon 2: [14.00, -1.95, 1.40]
 alpha carbon 3: [13.8, -2.44, 1.53]
 ...
-alpha carbon n: [radius =< 0, azimuth, polar] <-- last registered coordinate
+alpha carbon n+1: [radius =< threshold, azimuth, polar] <-- cutoff coordinate (radius below threshold)
 ```
 
 These will then be translated back finalized xyz coordinates.
@@ -105,6 +105,7 @@ alpha carbon 3: [-11.065344000905538, 9.318996844158944, 2.551681796821662],
 alpha carbon n: [13.383470121049884, 4.287071199307037, -0.5404584759555853],
 ```
 
+---
 
 ## NAAnoBot: Biochemical Environment Curation
 Model: NAAnoBot is responsible for deciding which amino acid belongs in certain coordinates.
@@ -124,8 +125,9 @@ As stated previously in the data section, the validation data split consisted no
 unseen SMILES that would then produce said XY data points. This was done to "encourage" potential zero-shot capabilities
 for new molecules.
 
-might be good to have this here later on 
+might be good to have this here later on
 
+---
 
 ## Disclaimer + Note on Pathogenic Resemblance
 This project is an independent research prototype, built for learning and exploration.
@@ -137,3 +139,11 @@ There may also exist the possibility that the pockets generated might resemble c
 However, I should note that there is a distinction between:
 - Pathogenic active / binding sites: exist within a pathogen + performs harmful function, comprised of more complex structures
 - NanoMaker-generated pockets: 3D-designed pocket with the sole purpose of high binding affinity
+
+---
+
+## License
+Copyright (c) 2026 Elliot Chan 
+
+This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.en.html).
+See the [LICENSE](LICENSE) file for details.
