@@ -15,7 +15,7 @@ Protein binding pockets are characterized as "radial" sequences of spherical coo
 and biochemical feature vectors. The fineness of ordering is determined by a "radial_resolution" parameter (default 100). 
 Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
 ```
-[[['A'], [rad1, az1, pl1]], [['V'], [rad2, az2, pl2]] .... [['VOID'], [0, 0, 0]]]
+[[[AA_vector_1], [rad1, az1, pl1]], [[AA_vector_2], [rad2, az2, pl2]] .... [[VOID (all 0s)], [0, 0, 0]]]
          # radius, azimuth, polar                            # end "tokens"
 ```
 Coordinates consist of radius value in angstroms, azimuth and polar angles computed from relative XYZ values. 
@@ -50,13 +50,24 @@ When presented with a chemical compound, it will say: "the protein cage surround
 molecule should look like this". It then generates a series of spherical coordinate vectors corresponding to an undefined 
 amino acid's alpha carbon's placement relative to the chemical compound's centroid (geometric center).
 
+note: alpha carbon = main carbon of amino acid
+
 e.g.
 ```
 alpha carbon 1: [14.13, -1.043, 1.56]
 alpha carbon 2: [14.00, -1.95, 1.40]
 alpha carbon 3: [13.8, -2.44, 1.53]
 ...
-alpha carbon n: [0, 0, 0]
+alpha carbon n: [radius =< 0, azimuth, polar] <-- last registered coordinate
+```
+
+These will then be translated back finalized xyz coordinates.
+```
+alpha carbon 1: [-6.734169765180114, 14.448926127937195, 2.925794734487335],
+alpha carbon 2: [-4.016766858354317, 14.904996348343234, 1.74489712118305],
+alpha carbon 3: [-11.065344000905538, 9.318996844158944, 2.551681796821662],
+...
+alpha carbon n: [13.383470121049884, 4.287071199307037, -0.5404584759555853],
 ```
 
 

@@ -8,3 +8,6 @@ def get_project_root() -> Path:
 PROJECT_ROOT = get_project_root()
 SOURCE_ROOT = PROJECT_ROOT / "src"
 DATABASE = PROJECT_ROOT / "database"
+
+nnmkr = SOURCE_ROOT / "nano_maker"
+CONTAINER = nnmkr / "container"

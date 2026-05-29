@@ -11,18 +11,9 @@
 # I don't think we need a module for tokenizing, this isn't NLP
 # put stuff in nAAno_library for physicochemical analysis
 
-# save this
-from naanolibrary import *
+# TODO: ramachandran freedom feature
 
-# protein feature engineering:
-# spatial data + physicochemical data
-# when you pass an AA seq through ESM2, you get back a matrix of shape:
-# [sequence length x embedding dimension] - big problem
-# each row is a per-residue embedding, a vector that encodes that AA's...
-# - identity, local chemical environment, inferred structural context as a vector
-# add parts of GEM to append a physiochemical vector on top of spatial one
-# - charge, hydrophobicity, pKa, H-bond capacity, .etc
-# GEM properties = nAAno_token
+from src.nano_maker.modules.nAAno.naanolibrary import *
 
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
@@ -91,5 +82,4 @@ def encoder_check(verbose=True):
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
-
 # encoder_check()  # note: all good

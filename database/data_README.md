@@ -28,5 +28,7 @@ Download the above file, plug it in this folder and run the notebook cells.
 The following files are available straight from the repo unlike the above which are obtained by running the jupyter notebook cells.
 - molfp_df.pkl -> molecular fingerprints for all unique SMILES
 - radial_seq_df.pkl -> radial sequences for all unique proteins (look at README.md)
-- test and training pointers.parquet -> "pointer" files containing each high affinity pair's SMILES string and PDB_ID as well as all available window indexes for ease of downstream sampling
-
+- test and training pointers.parquet -> "pointer" files containing each high affinity pair's SMILES string and PDB_ID as well as all available window indexes for ease of downstream sampling which prevents data explosion.
+  - 5k radial sequences, 8k smiles -> hundreds of sequences per smiles -> 5-107 proteins per sequence ==> 14 million training data points and 3 million validation
+- The parquet files with "dict" are what I used to train the model on a GPU cluster, and the ones without were used for prototyping.
+- Used dict in attempt to optimize training time via cutting down load time with dictionary.
