@@ -7,19 +7,25 @@ These can then be used as protein pocket patch templates for drug-delivery molec
 
 NanoMaker separates the challenge of protein pocket design into two transformer tasks. 
 Skeleton creates the 3D spatial arrangement, the "skeleton", of the upcoming protein cage, 
-while NAAnoBot drops amino acids into that cage based on biochemical compatibility.
+while NAAnoBot slots amino acids into the empty coordinates based on biochemical compatibility.
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein cage is specific to that drug's properties.
 
-|                  Pocket "skeleton"                   |              Full Pocket with Amino Acids              |
+I've drawn out an example skeleton and its populated final form.
+On the left we see a system of linked empty nodes representing amino acid slots forming a cage around the ligand centroid.
+In the drawing on the right I've filled in those nodes with amino acids, completing the protein binding pocket.
+
+|             3D arrangement / "skeleton"              |            Full NanoMaker-generated pocket             |
 |:----------------------------------------------------:|:------------------------------------------------------:|
 | ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
+---
 
-Protein binding pockets are characterized as "radial" sequences of spherical coordinates ordered by decreasing shell radius
-and biochemical feature vectors. The fineness of ordering is determined by a "radial_resolution" parameter (default 100). 
-I've attempted to draw a conceptual visualization here:
+## "Radial" sequencing
+I've characterized 3D protein binding pockets as "radial" sequences of spherical coordinates ordered by decreasing shell radius
+and biochemical feature vectors. The fineness of the ordering is determined by a "radial_resolution" parameter (default 100). 
+I've attempted to draw and visualize my conceptualization of this here:
 
-|    Protein pocket "radial_sequence" representation     |
+|   Protein pocket to "radial_sequence" visualization    |
 |:------------------------------------------------------:|
 | <img src="images/what_NanoMaker_sees.png" width="400"> |
 
@@ -82,13 +88,13 @@ alpha carbon n: [13.383470121049884, 4.287071199307037, -0.5404584759555853],
 ```
 
 
-## NAANOBOT: Biochemical Environment Curation
-Model: NAANOBOT is responsible for deciding which amino acid belongs in certain coordinates.
+## NAAnoBot: Biochemical Environment Curation
+Model: NAAnoBot is responsible for deciding which amino acid belongs in certain coordinates.
 It actually doesn't interpret sequences via amino acid identities but rather their feature vectors.
 Each aa is characterized by their physicochemical properties and chemical structure(s) / functional group(s) that 
 distinguish them from the rest. 
 
-This means that NAANOBOT doesn't say "Valine" or "Leucine" belongs here, instead it says
+This means that NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says
 "An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until
 the protein pocket is completed.
 
