@@ -17,8 +17,12 @@ meaning that each protein cage is specific to that drug's properties.
 
 Protein binding pockets are characterized as "radial" sequences of spherical coordinates ordered by decreasing shell radius
 and biochemical feature vectors. The fineness of ordering is determined by a "radial_resolution" parameter (default 100). 
-This can conceptually visualized as such. 
-![what_NanoMaker_sees.png](images/what_NanoMaker_sees.png)
+I've attempted to draw a conceptual visualization here:
+
+|    Protein pocket "radial_sequence" representation     |
+|:------------------------------------------------------:|
+| <img src="images/what_NanoMaker_sees.png" width="400"> |
+
 
 Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
 ```
