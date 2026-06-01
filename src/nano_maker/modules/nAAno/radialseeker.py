@@ -47,7 +47,8 @@ class RadialSeeker:
         else:
             return False
 
-    def xyz_to_radial(self, xyz_vector):
+    @staticmethod
+    def xyz_to_radial(xyz_vector):
         """
         ENCODE: Converts a tensor of 3D vectors into spherical coordinate vector
         """
@@ -57,18 +58,14 @@ class RadialSeeker:
         polar = np.arccos(z / radius)
         return [radius.item(), azimuthal.item(), polar.item()]
 
-    def radial_to_xyz(self, spherical_vector):
+    @staticmethod
+    def radial_to_xyz(spherical_vector):
         """DECODE: Converts a tensor of spherical coordinates into raw angstrom values"""
         radius, azimuthal, polar = spherical_vector
         x = radius * np.sin(polar) * np.cos(azimuthal)
         y = radius * np.sin(polar) * np.sin(azimuthal)
         z = radius * np.cos(polar)
         return [x.item(), y.item(), z.item()]
-
-
-    # TODO
-    def amino_acid(self):
-        pass
 
 
 def test_resolution():

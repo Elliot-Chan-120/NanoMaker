@@ -24,7 +24,6 @@ MOLECULAR_WEIGHTS = {
     'V': 0.12,
     'W': 0.20,
     'Y': 0.18,
-    'VOID': 0,
 }
 
 # net charges at physiological pH ~7.4
@@ -49,7 +48,6 @@ NET_CHARGES = {
     'V': 0,
     'W': 0,
     'Y': 0,
-    'VOID': 0,
 }
 
 # isoelectric point pHs from peptide web
@@ -75,7 +73,6 @@ ISOELECTRIC_PTS = {
     'V': 5.97,
     'W': 5.94,
     'Y': 5.66,
-    'VOID': 0,
 }
 
 # hydrophobicity levels - pH 7
@@ -103,7 +100,6 @@ HYDROPHOBICITY_IDXS = {
     'V': 76,
     'W': 97,
     'Y': 63,
-    'VOID': 0,
 }
 
 
@@ -129,7 +125,6 @@ HALF_LIFE = {
     'V': 100,
     'W': 2.8,
     'Y': 2.8,
-    'VOID': 0,
 }
 
 
@@ -156,5 +151,4 @@ FUNCTIONAL_FP = {
     "S": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
     "T": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
     "P": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    "VOID": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }

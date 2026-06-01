@@ -5,8 +5,7 @@ import pandas as pd
 
 # refer to notes to clear up gaps in understanding this
 
-# SKELETON MODEL
-class SkeletonModel(nn.Module):
+class Skeleton(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
                  map4_res, max_angstroms,
                  dropout):

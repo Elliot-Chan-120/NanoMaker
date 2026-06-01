@@ -8,7 +8,7 @@ from src.paths import *
 from src.nano_maker.modules.nAAno.smiles_handler import *
 from src.nano_maker.modules.nAAno.radialseeker import RadialSeeker
 from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
-from src.nano_maker.skeleton import SkeletonModel
+from src.nano_maker.skeleton import Skeleton
 
 class NanoMaker:
 
@@ -16,7 +16,7 @@ class NanoMaker:
         # INITIALIZE SKELETON =========================================================================================
         sk_cfg = skeleton_cfg.copy()
 
-        self._SkeletonPrototype = SkeletonModel(n_embd=sk_cfg['n_embd'], n_head=sk_cfg['n_head'],
+        self._SkeletonPrototype = Skeleton(n_embd=sk_cfg['n_embd'], n_head=sk_cfg['n_head'],
                                                 n_layers=sk_cfg['n_layers'],
                                                 block_size=sk_cfg['block_size'],
                                                 map4_res=sk_cfg['map4_res'], max_angstroms=sk_cfg['max_angstroms'],
