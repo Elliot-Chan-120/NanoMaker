@@ -6,16 +6,15 @@ https://www.bindingdb.org/rwd/bind/chemsearch/marvin/SDFdownload.jsp?download_fi
 
 Download and move the file into "database".
 
-Even though the folder is called "prototyping_notebooks", the data mining notebooks are essentially finalized code and what I used to get the main data. 
-Notebooks just made data exploration and quality filtering easier.
-
 Run the following in this order:
-- [1] raw_data_miner.ipynb
-- [2] radial_sequencing_prototype.ipynb
-- [3] get_pointers.ipynb
+- [1] a00_raw_data_miner.ipynb
+- [2] a01_radial_sequencing_prototype.ipynb
+- [3] b00_skeleton_pointers.ipynb
+- [4] c00_naanobot_pointers.ipynb
 
 You should get the same files mentioned in the data_README.md, including the ones that this project came with.
-The notebooks also contain (casual language) comments which hopefully slightly guide you through the process.
+The notebooks also contain (slightly casual) comments which hopefully slightly guide you through the process.
 
 Prototype models for testing can be made in in skeleton_training_prototype.ipynb and naanobot_training_prototype.ipynb.
 There you can play around with the parameters and how much training data they see before training on a cloud / GPU server.
+# note: i deleted the prototyping parquet files -> regenerate them and allow for prototyping again

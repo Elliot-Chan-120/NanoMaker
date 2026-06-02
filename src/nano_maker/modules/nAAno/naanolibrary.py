@@ -108,33 +108,7 @@ HYDROPHOBICITY_IDXS = {
 # reference for the above: see GEM README.md
 
 
-# individual half lives -> divided by 100
-HALF_LIFE = {
-    'A': 0.044,
-    'C': 0.012,
-    'D': 0.011,
-    'E': 0.01,
-    'F': 0.01,
-    'G': 0.30,
-    'H': 0.035,
-    'I': 0.20,
-    'K': 0.013,
-    'L': 0.055,
-    'M': 0.30,
-    'N': 0.014,
-    'P': 0.21,
-    'Q': 0.08,
-    'R': 0.01,
-    'S': 0.019,
-    'T': 0.072,
-    'V': 1,
-    'W': 0.028,
-    'Y': 0.028,
-    'VOID': -1,
-}
 # Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), + biochemistry notes
-
-
 # pseudo molecular fingerprint accounting for biochemical / functional group standout features
 # check function_fp_scheme.txt for more understanding
 FUNCTIONAL_FP = {

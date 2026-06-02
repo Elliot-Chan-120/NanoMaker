@@ -6,9 +6,8 @@
 
 # feature vectors as "tokens" per amino acid
 # put stuff in nAAno_library for physicochemical analysis
-
-import torch
 from src.nano_maker.modules.nAAno.naanolibrary import *
+import torch
 
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
@@ -57,49 +56,59 @@ class NAAnoEng:
 
         # embedding scheme, MAKE SURE TO UPDATE THIS IF YOU EVER UPDATE NAANOLIBRARY
         naano_vector = [
-            MOLECULAR_WEIGHTS[aa_id],       # 1
-            NET_CHARGES[aa_id],             # 1
-            ISOELECTRIC_PTS[aa_id],         # 1
-            HYDROPHOBICITY_IDXS[aa_id],     # 1
-            HALF_LIFE[aa_id],               # 1
+            MOLECULAR_WEIGHTS[aa_id] * 100,  # scale up molecular weights by a lot, all in 0.1 range
+            NET_CHARGES[aa_id] * 5,  # scale up charge
+            ISOELECTRIC_PTS[aa_id],
+            HYDROPHOBICITY_IDXS[aa_id] * 10, # same thing
+            # generally we want all of them to be on a whole number ish scale
         ]
-        naano_vector += FUNCTIONAL_FP[aa_id]    # 13
-        naano_vector += PROPENSITIES[aa_id]     # 4
-        return naano_vector    # 5 physicochemical, 13 one-hot functional group,  4 flexibility / structural propensity
+        naano_vector += FUNCTIONAL_FP[aa_id]
+        naano_vector += [p * 10 for p in PROPENSITIES[aa_id]]
+        return naano_vector
 
     # generation + training data processing
     def get_nAAno_X(self, coord_context, bioch_context, coord_Y):
-        # go through coordinate context (iterate through range)
+        """
+        Generates contextual data for naano dataset class and NAAnoBot's amino acid cage generation
+        :param coord_context:
+        :param bioch_context:
+        :param coord_Y:
+        :return:
+        """
+        # go through coordinate context (iterate through range) <- vectorized now
         # calculate and add relative coordinates concat. with nAAnovectors
-        naano_X = []
-        coord_Y = torch.tensor(coord_Y, dtype=torch.float32)
+        # construct augmented relative coordinate vector then concat with nAAno_token
+        coord_X_tensor = torch.tensor(coord_context, dtype=torch.float32)
+        bioch_tensor = torch.tensor(bioch_context, dtype=torch.float32)
+        coord_Y_tensor = torch.tensor(coord_Y, dtype=torch.float32)
 
-        for idx in range(self.block_size):
-            coord_X = torch.tensor(coord_context[idx], dtype=torch.float32)
-            naanovector_X = torch.tensor(bioch_context[idx])
-            # construct augmented relative coordinate vector then concat with nAAno_token
-            # XYZ
-            relative_vect = self.sph_to_xyz(coord_X) - self.sph_to_xyz(coord_Y)  # 3
-            euclidean_dist = (torch.norm(relative_vect) + 1e-8).unsqueeze(0)   # 1
-            unit_dir = (relative_vect / euclidean_dist)   # 3
+        # XYZ
+        xyz_X = self.sph_to_xyz(coord_X_tensor)
+        # workaround the batch processing nature -> add dimension at 0th then undo
+        xyz_Y = self.sph_to_xyz(coord_Y_tensor.unsqueeze(0)).squeeze(0)
 
-            # spherical
-            Xr, Xaz, Xpl = coord_X
-            Yr, Yaz, Ypl = coord_Y
-            r_diff = Yr - Xr.unsqueeze(0)    # 1
-            az_diff = self.angle_diff(Xaz, Yaz).unsqueeze(0)   # 1
-            pl_diff = self.angle_diff(Xpl, Ypl).unsqueeze(0)  # 1
+        relative_vect = xyz_X - xyz_Y.unsqueeze(0)   # 3
+        euclidean = (torch.norm(relative_vect, dim=-1, keepdim=True) + 1e-8) # 1
+        unit_dir = relative_vect / euclidean  # 3
 
-            naano_X.append(torch.cat([naanovector_X, relative_vect, euclidean_dist, unit_dir,
-                                        r_diff, az_diff, pl_diff]))
+        r_diff = (coord_Y_tensor[0] - coord_X_tensor[:, 0]).unsqueeze(1) # 1
+        az_diff = self.angle_diff(coord_X_tensor[:, 1], coord_Y_tensor[1]).unsqueeze(1) # 1
+        pl_diff = self.angle_diff(coord_X_tensor[:, 2], coord_Y_tensor[2]).unsqueeze(1) # 1
 
-        return torch.stack(naano_X)  # block_size, 32
+        # nAAno "token" = 22
+        # spatial + 10
+        # total features is 32 -> output 22 on linear head
+
+        return torch.cat([bioch_tensor, relative_vect, euclidean,
+                          unit_dir, r_diff, az_diff, pl_diff], dim=-1)
 
     def approx_id(self, vector):
-        min_error = None
+        min_error = float('inf')
         approximate_identity = None
+        vector = vector.detach().float().squeeze()
         for aa_id, n_v in self.nAAno_vectors.items():
-            error = vector - n_v
+            n_v_tensor = torch.tensor(n_v, dtype=torch.float32)
+            error = torch.norm(vector - n_v_tensor).item()
             if error < min_error:
                 min_error = error
                 approximate_identity = aa_id
@@ -108,17 +117,17 @@ class NAAnoEng:
 
 
     @staticmethod
-    def sph_to_xyz(spherical_vector):
-        v = torch.tensor(spherical_vector, dtype=torch.float32)
-        r, az, pl = v[0], v[1], v[2]
+    def sph_to_xyz(spherical_vector_batch):
+        v = spherical_vector_batch
+        r, az, pl = v[:, 0], v[:, 1], v[:, 2]
         x = r * torch.sin(pl) * torch.cos(az)
         y = r * torch.sin(pl) * torch.sin(az)
         z = r * torch.cos(pl)
-        return torch.stack([x, y, z]) # def need to understand torch better cause this messed up the whole thing for some reason
+        return torch.stack([x, y, z], dim=-1)
 
     @staticmethod
     def angle_diff(aX, aY):
-        return ((torch.cos(aX) - torch.cos(aY))**2 + (torch.sin(aX) - torch.sin(aY))**2).mean()
+        return (torch.cos(aX) - torch.cos(aY))**2 + (torch.sin(aX) - torch.sin(aY))**2
 
 def encoder_check(verbose=True):
     module = NAAnoEng(max_angstroms=42, block_size=42, verbose=False)
@@ -136,4 +145,4 @@ def encoder_check(verbose=True):
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
-# encoder_check()  # note: all good
+encoder_check()  # note: all good

@@ -57,16 +57,16 @@ Since protein cage generation is out --> in, I interpreted hitting a radius of 0
 ## Data + Training
 Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle distance for Skeleton. NAAnoBot's loss is (not defined right now) composed of a hybrid between MSE and Euclidean distance between feature vectors.
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
+Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
-
 ---
 
 ## Model Performance and Loss
 Each model went through 3 epochs across the same train / validation drug identity split.
 Training loss was computed as a running average over all batches. 
 
-Skeleton:
+**Skeleton**
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
@@ -74,6 +74,17 @@ Skeleton:
 | 1       | 0.618       | 0.388            | -0.23     |
 | 2       | 0.398       | 0.262            | -0.14     |
 | 3       | 0.285       | 0.232            | -0.053    |
+
+
+
+**NAAnoBot**
+
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+|---------|-------------|------------------|-----------|
+| Initial | 60.932      | n/a              | n/a       |
+| 1       | 0.          | 0.               |           |
+| 2       | 0.          | 0.               |           |
+| 3       | 0.          | 0.               |           |
 
 ---
 
@@ -108,24 +119,25 @@ alpha carbon n: [13.383470121049884, 4.287071199307037, -0.5404584759555853],
 ---
 
 ## NAAnoBot: Biochemical Environment Curation
-Model: NAAnoBot is responsible for deciding which amino acid belongs in certain coordinates.
-It actually doesn't interpret sequences via amino acid identities but rather their feature vectors.
+Model: NAAnoBot is responsible for deciding which amino acid belongs in a given coordinate.
+
+NAAnoBot works with spatially aware "tokens", meaning it actually doesn't interpret sequences via 
+amino acid identities but rather their feature vectors + relative coordinates to the target coordinate.
 Each aa is characterized by their physicochemical properties and chemical structure(s) / functional group(s) that 
 distinguish them from the rest. 
 
-This means that NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says
-"An amino acid with size X belongs here, and a protein with a Guanidium ring should be here" and so on until
-the protein pocket is completed.
+NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says 
+"I see all these proteins around coordinate 'x', and because of their biochemical features and geometry relative to 'x', an amino acid with "*Y* biochemical properties" would fit in there".
+Once the biochemical feature vector is produced, it is then matched against all amino acid feature vectors to determine its best fit.
+It does this continuously for each provided coordinate until the protein pocket is completed.
 
 ---
 
 
 ## todo: Generalization to Unseen Chemistry (after conducting tests on datasets)
 As stated previously in the data section, the validation data split consisted not of 20-30% of XY data points, but rather
-unseen SMILES that would then produce said XY data points. This was done to "encourage" potential zero-shot capabilities
+unseen SMILES (20% of total SMILES) that would then produce said XY data points. This was done to "encourage" potential zero-shot capabilities
 for new molecules.
-
-might be good to have this here later on
 
 ---
 
