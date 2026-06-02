@@ -57,15 +57,15 @@ class NAAnoEng:
 
         # embedding scheme, MAKE SURE TO UPDATE THIS IF YOU EVER UPDATE NAANOLIBRARY
         naano_vector = [
-            MOLECULAR_WEIGHTS[aa_id],
-            NET_CHARGES[aa_id],
-            ISOELECTRIC_PTS[aa_id],
-            HYDROPHOBICITY_IDXS[aa_id],
-            HALF_LIFE[aa_id],
+            MOLECULAR_WEIGHTS[aa_id],       # 1
+            NET_CHARGES[aa_id],             # 1
+            ISOELECTRIC_PTS[aa_id],         # 1
+            HYDROPHOBICITY_IDXS[aa_id],     # 1
+            HALF_LIFE[aa_id],               # 1
         ]
-        naano_vector += FUNCTIONAL_FP[aa_id]
-        naano_vector += PROPENSITIES[aa_id]
-        return naano_vector
+        naano_vector += FUNCTIONAL_FP[aa_id]    # 13
+        naano_vector += PROPENSITIES[aa_id]     # 4
+        return naano_vector    # 5 physicochemical, 13 one-hot functional group,  4 flexibility / structural propensity
 
     # generation + training data processing
     def get_nAAno_X(self, coord_context, bioch_context, coord_Y):
@@ -114,7 +114,7 @@ class NAAnoEng:
         x = r * torch.sin(pl) * torch.cos(az)
         y = r * torch.sin(pl) * torch.sin(az)
         z = r * torch.cos(pl)
-        return torch.stack([x, y, z])
+        return torch.stack([x, y, z]) # def need to understand torch better cause this messed up the whole thing for some reason
 
     @staticmethod
     def angle_diff(aX, aY):

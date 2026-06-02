@@ -1,3 +1,6 @@
+from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
+# needs internal NAAnoEng module
+
 # Generates a suitable biochemical environment for a SMILES given nAAnoVector context
 import torch
 import torch.nn as nn
@@ -7,75 +10,102 @@ import pandas as pd
 # NAANOBOT MODEL
 class NAAnoBot(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
-                 map4_res, n_features,
+                 map4_res, max_angstroms,
+                 n_nAAno_features, n_spatial_features,
                  dropout):
         super().__init__()
         self.block_size = block_size
         self.map4_res = map4_res
-        self.n_features = n_features
+        self.n_nAAno_features = n_nAAno_features
+        self.n_spatial_features = n_spatial_features
+        total_features = self.n_nAAno_features + self.n_spatial_features
 
-        self.v_project = nn.Linear((n_features + 3), n_embd)  # feed coordinates here
+        self.max_angstroms = max_angstroms
+        self.naano_module = NAAnoEng(max_angstroms=max_angstroms,
+                                     block_size=block_size,
+                                     verbose=False)
+        self.naano_module.initialize()  # generate tokens
+
+        # layers + architecture
+        self.nAAno_project = nn.Linear(total_features, n_embd)  # feed nAAno feature vector
         self.pos_emb = nn.Embedding(block_size, n_embd)
         self.mol_encoder = MolecularEncoder(n_embd, map4_res, dropout)
 
         self.stacks = nn.ModuleList([Stack(n_embd, n_head, block_size, dropout) for _ in range(n_layers)])
 
-        # OUTPUT HEAD -> outputs coordinates
+        # OUTPUT HEAD -> outputs feature vector
         self.ln_f = nn.LayerNorm(n_embd)
-        self.v_head = nn.Linear(n_embd, n_features)
+        self.nAAno_head = nn.Linear(n_embd, n_nAAno_features)
 
 
-    def forward(self, bio_context, map4_enc, targets=None):
+    def forward(self, nAAno_context, map4_enc, targets=None):
         """
-        bio_context will be [n_batch, block_size, n_features + 3]
+        nAAno_context will be [n_batch, block_size, n_features + 3]
         targets is [n_batch, 1, n_features]
         map4_enc -> unsure how I'm going to encode this
         """
-        B, T, C = bio_context.shape
-        coordinate_emb = self.c_project(bio_context.float())
-        pos_emb = self.pos_emb(torch.arange(T, device=bio_context.device))
-        x = coordinate_emb + pos_emb
+        B, T, C = nAAno_context.shape
+        nAAno_emb = self.nAAno_project(nAAno_context.float())
+        pos_emb = self.pos_emb(torch.arange(T, device=nAAno_context.device))
+        x = nAAno_emb + pos_emb
 
         mol_emb = self.mol_encoder(map4_enc.float()).unsqueeze(1)
 
         for stack in self.stacks:
             x = stack(x, mol_emb)
 
-        r, az, pl = self.c_head(self.ln_f(x[:, -1, :])).unbind(dim=1)
-        r = F.softplus(r)                 # clip off negative values
-        az = torch.tanh(az) * torch.pi    # prevent outputs from being nonsensical angles
-        pl = torch.sigmoid(pl) * torch.pi
+        output = self.nAAno_head(self.ln_f(x[:, -1, :]))
 
-        output = torch.stack([r, az, pl], dim=1)
-
-        # circular loss instead of regular coordinate MSE
-        # doesn't make sense to convert to xyz so I'll use circular loss and radius MSE
         loss = None
         if targets is not None:
-            # figure this out after
-            loss = 42
+            # split up loss into various parts
+            # notes:
+            # first 5 -> physicochemical
+            # 13 -> functional group fingerprint (one-hot)
+            # 4 structural propensity
+            physicochemical_loss = F.mse_loss(output[:, :5],
+                                              targets[:, :5])
+            functional_loss = F.binary_cross_entropy_with_logits(output[:, 5:18],
+                                                                 targets[:, 5:18])
+            structural_loss = F.mse_loss(output[:, 18:],
+                                         targets[:, 18:])
+
+            loss = physicochemical_loss * 0.333 + functional_loss * 0.333 + structural_loss * 0.333
 
         return output, loss
 
 
-    def generate(self, map4_enc, max_AAs=130):
-        # largest protein pocket in dataset was 107
+    def generate(self, map4_enc, sph_coordinates):
+        """
+        Feed it a list of spherical coordinates, and have them converted to what is done in
+        :param map4_enc:
+        :param sph_coordinates:
+        :return:
+        """
         map4_enc = map4_enc.to(next(self.parameters()).device)
 
-        # may 26 -> empty outer context pad / "token" = max_angstroms, neutral azimuth, neutral polar
-        # -> inner stop "token" is 0 0 0
-        # ok changing this after downloading the weights doesn't matter - separate from inference logic
-        # max angstroms is actually ~5 angstroms past the max in the dataset, so the relationship is still clear
-        coord_context = torch.tensor([[self.max_angstroms, 0, 0] for _ in range(self.block_size)]).unsqueeze(0).to(map4_enc.device)
+        bioch_context = [[self.naano_module.get_nAAnovector("VOID")]] * self.block_size
+        coord_context = [[self.max_angstroms, 0, 0]] * self.block_size
 
-        coord_out = []
+        aa_order = []
 
-        for _ in range(max_AAs):
-            next_coord, _ = self.forward(coord_context, map4_enc)
-            coord_out.append(next_coord.detach())
-            coord_context = torch.cat([coord_context[:, 1:, :], next_coord.unsqueeze(1)], dim=1)
+        for coordinate in sph_coordinates:   # go through spherical coordinates 1 by 1
 
-        return torch.stack(coord_out, dim=1).squeeze(0)
+            # converts to tensors internally
+            naano_X = self.naano_module.get_nAAno_X(coord_context, bioch_context, coordinate).unsqueeze(0)
+
+            output, _ = self.forward(naano_X, map4_enc)
+            aa_id = self.naano_module.approx_id(output)
+
+            aa_order.append(aa_id)
+
+            next_nAAnovector = self.naano_module.get_nAAnovector(aa_id)
+            bioch_context = bioch_context[1:] + [next_nAAnovector]
+            coord_context = coord_context[1:] + [coordinate.tolist() if torch.is_tensor(coordinate) else coordinate]
+
+
+        return aa_order
+
 
 # most of the stuff below is from the nanoGPT file except the nanogpt and molecular encoder
 class Head(nn.Module):
