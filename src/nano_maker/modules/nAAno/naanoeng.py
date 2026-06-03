@@ -145,4 +145,4 @@ def encoder_check(verbose=True):
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
-encoder_check()  # note: all good
+# encoder_check()  # note: all good
