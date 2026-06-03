@@ -1,11 +1,10 @@
-from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
-# needs internal NAAnoEng module
-
 # Generates a suitable biochemical environment for a SMILES given nAAnoVector context
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pandas as pd
+
+from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
 
 # NAANOBOT MODEL
 class NAAnoBot(nn.Module):
@@ -24,7 +23,7 @@ class NAAnoBot(nn.Module):
         self.naano_module = NAAnoEng(max_angstroms=max_angstroms,
                                      block_size=block_size,
                                      verbose=False)
-        self.naano_module.initialize()  # generate tokens
+        self.naano_module.initialize()
 
         # layers + architecture
         self.nAAno_project = nn.Linear(total_features, n_embd)  # feed nAAno feature vector
@@ -60,15 +59,15 @@ class NAAnoBot(nn.Module):
         if targets is not None:
             # split up loss into various parts
             # notes:
-            # first 5 -> physicochemical
+            # first 4 -> physicochemical -> removed half life
             # 13 -> functional group fingerprint (one-hot)
             # 4 structural propensity
-            physicochemical_loss = F.mse_loss(output[:, :5],
-                                              targets[:, :5])
-            functional_loss = F.binary_cross_entropy_with_logits(output[:, 5:18],
-                                                                 targets[:, 5:18])
-            structural_loss = F.mse_loss(output[:, 18:],
-                                         targets[:, 18:])
+            physicochemical_loss = F.mse_loss(output[:, :4],
+                                              targets[:, :4])
+            functional_loss = F.binary_cross_entropy_with_logits(output[:, 4:17],
+                                                                 targets[:, 4:17])
+            structural_loss = F.mse_loss(output[:, 17:],
+                                         targets[:, 17:])
 
             loss = physicochemical_loss * 0.333 + functional_loss * 0.333 + structural_loss * 0.333
 
@@ -84,8 +83,8 @@ class NAAnoBot(nn.Module):
         """
         map4_enc = map4_enc.to(next(self.parameters()).device)
 
-        bioch_context = [[self.naano_module.get_nAAnovector("VOID")]] * self.block_size
-        coord_context = [[self.max_angstroms, 0, 0]] * self.block_size
+        bioch_context = [self.naano_module.get_nAAnovector("VOID") for _ in range(self.block_size)]
+        coord_context = [[self.max_angstroms, 0, 0] for _ in range(self.block_size)]
 
         aa_order = []
 

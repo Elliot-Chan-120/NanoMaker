@@ -13,7 +13,7 @@ meaning that each protein cage is specific to that drug's properties.
 
 I've drawn out an example skeleton and its populated final form:
 
-|             3D arrangement / "skeleton"              |            Full NanoMaker-generated pocket             |
+|        Figure 1: 3D arrangement / "skeleton"         |       Figure 2: Full NanoMaker-generated pocket        |
 |:----------------------------------------------------:|:------------------------------------------------------:|
 | ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
 
@@ -64,7 +64,7 @@ meaning that the models learn actual relationships b/w 3D arrangement, biochemis
 
 ## Model Performance and Loss
 Each model went through 3 epochs across the same train / validation drug identity split.
-Training loss was computed as a running average over all batches. 
+Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
 **Skeleton**
 
@@ -82,7 +82,7 @@ Training loss was computed as a running average over all batches.
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 60.932      | n/a              | n/a       |
-| 1       | 0.          | 0.               |           |
+| 1       | 0.840       | 0.229            | -0.611    |
 | 2       | 0.          | 0.               |           |
 | 3       | 0.          | 0.               |           |
 
@@ -90,11 +90,11 @@ Training loss was computed as a running average over all batches.
 
 ## Skeleton: 3D structure generation
 Model: Skeleton is responsible for generating the 3D spatial arrangement of the protein pocket
-prior to the amino acid insertion into said pocket, hence the name "Skeleton". 
+prior to amino acid insertion into said pocket, hence the name "Skeleton". 
 
 When presented with a chemical compound, it will say: "the protein cage surrounding this 
-molecule should look like this". It then generates a series of spherical coordinate vectors corresponding to an undefined 
-amino acid's alpha carbon's placement relative to the chemical compound's centroid.
+molecule should look like this". It then generates a series of spherical coordinate vectors, with each
+corresponding to a "blank" amino acid's alpha carbon's placement relative to the chemical compound's centroid (Figure 1).
 
 note: alpha carbon = main carbon of amino acid
 

@@ -30,11 +30,12 @@ class NanoMaker:
         # INITIALIZE NAANOBOT ==========================================================================================
         self.map4_fingerprint = None
 
-        # MODULES ======================================================================================================
+        # radial  ======================================================================================================
         self._RadialSeeker = RadialSeeker(radial_resolution=radial_cfg['radial_resolution'],
                                           max_angstroms=radial_cfg['max_angstroms'],
                                           verbose=False)
-        self._NAAnoEng = NAAnoEng(verbose=False)
+
+        # naanoeng is internally called in NAAnoBot for generation ease
 
 
     def ingest_chemical(self, smiles):
