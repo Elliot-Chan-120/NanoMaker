@@ -1,5 +1,5 @@
 skeleton_weights = "skeleton_prototype.pt"
-naanobot_weights = "naanobot_prototype.pt"
+naanobot_weights = "naanobot_I2.pt"
 
 # globals
 max_angstroms = 33
