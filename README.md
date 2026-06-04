@@ -63,24 +63,25 @@ The data split was done according to drug identity rather than a random split af
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
+
 ---
 
-## Model Performance and Loss
+## Model Performance and Behaviour: Loss & Pocket Biochemistry
 Each model went through 3 epochs across the same train / validation drug identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
-**Skeleton**
+**Skeleton Loss**
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 44.884      | n/a              | n/a       |
-| 1       | 0.618       | 0.388            | -0.23     |
-| 2       | 0.398       | 0.262            | -0.14     |
-| 3       | 0.285       | 0.232            | -0.053    |
+| Initial |             | n/a              | n/a       |
+| 1       | 0.          | 0.               | -0.       |
+| 2       | 0.          | 0.               | -0.       |
+| 3       | 0.          | 0.               | -0.       |
 
 
 
-**NAAnoBot**
+**NAAnoBot Loss**
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
@@ -88,6 +89,11 @@ Training loss was computed as a running average over all batches, hence why the 
 | 1       | 0.          | 0.               | -0.       |
 | 2       | 0.          | 0.               | -0.       |
 | 3       | 0.          | 0.               |           |
+
+
+TODO: 
+- Loss Curves
+- Pocket polarity analysis
 
 ---
 
@@ -135,7 +141,6 @@ Once the biochemical feature vector is produced, it is then matched against all 
 It does this continuously for each provided coordinate until the protein pocket is completed.
 
 ---
-
 
 ## todo: Generalization to Unseen Chemistry (after conducting tests on datasets)
 As stated previously in the data section, the validation data split consisted not of 20-30% of XY data points, but rather
