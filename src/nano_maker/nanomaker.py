@@ -36,7 +36,6 @@ class NanoMaker:
                                            n_layers=nb_cfg["n_layers"],
                                            block_size=nb_cfg["block_size"],
                                            map4_res=nb_cfg["map4_res"],
-                                           n_nAAno_features=nb_cfg["n_nAAno_features"],
                                            n_spatial_features=nb_cfg["n_spatial_features"],
                                            max_angstroms=nb_cfg["max_angstroms"],
                                            dropout=nb_cfg["dropout"])

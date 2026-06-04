@@ -9,21 +9,23 @@ from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
 # NAANOBOT MODEL
 class NAAnoBot(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
-                 map4_res, max_angstroms,
-                 n_nAAno_features, n_spatial_features,
+                 map4_res, max_angstroms, n_spatial_features,
                  dropout):
         super().__init__()
         self.block_size = block_size
         self.map4_res = map4_res
-        self.n_nAAno_features = n_nAAno_features
-        self.n_spatial_features = n_spatial_features
-        total_features = self.n_nAAno_features + self.n_spatial_features
-
         self.max_angstroms = max_angstroms
         self.naano_module = NAAnoEng(max_angstroms=max_angstroms,
                                      block_size=block_size,
                                      verbose=False)
         self.naano_module.initialize()
+        n_nAAno_features = self.naano_module.n_features()
+
+        self.n_nAAno_features = n_nAAno_features
+        self.n_spatial_features = n_spatial_features
+        total_features = self.n_nAAno_features + self.n_spatial_features
+
+
 
         # layers + architecture
         self.nAAno_project = nn.Linear(total_features, n_embd)  # feed nAAno feature vector

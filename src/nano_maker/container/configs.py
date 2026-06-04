@@ -33,6 +33,5 @@ naanobot_config = {
     'max_angstroms': max_angstroms,
     'radial_resolution': radial_resolution,
     'dropout': 0.15,
-    "n_nAAno_features": 21,
     "n_spatial_features": 10,
 }
