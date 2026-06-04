@@ -85,11 +85,11 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 0.691       | n/a              | n/a       |
-| 1       | 0.0129      | 0.00236          | -0.00961  |
-NAAnoBot's batch-level training loss reached 0.001-0.003 by epoch end, with a
-validation loss of 0.00236 and a train loss of 0.0129 (running average).
-Considering the 21-dimensional feature vector, the calculated RMSE of 0.0485
+| Initial | 0.861       | n/a              | n/a       |
+| 1       | 0.0         | 0.0              | -0.       |
+NAAnoBot's batch-level training loss reached 0.-0. by epoch end, with a
+validation loss of 0. and a train loss of 0. (running average).
+Considering the 21-dimensional feature vector, the calculated RMSE of 0.
 was deemed near-noise-floor error, and further training was deliberately avoided
 to preserve generation diversity. Amino acid sampling is done via temperature sampling to
 further preserve biochemical diveristy.

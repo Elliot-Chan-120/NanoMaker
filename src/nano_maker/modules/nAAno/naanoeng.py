@@ -64,7 +64,7 @@ class NAAnoEng:
             HYDROPHOBICITY_IDXS[aa_id],
             # generally we want all of them to be on the same scale
         ]
-        naano_vector += FUNCTIONAL_FP[aa_id]
+        # naano_vector += FUNCTIONAL_FP[aa_id]
         naano_vector += PROPENSITIES[aa_id]
         return naano_vector
 
