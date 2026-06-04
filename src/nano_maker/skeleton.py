@@ -56,11 +56,12 @@ class Skeleton(nn.Module):
             Xrad, Xazm, Xplr = output.unbind(dim=1)
             Yrad, Yazm, Yplr = targets.unbind(dim=1)
 
-            radial_loss = F.mse_loss(Xrad, Yrad)  # linear scale
+            # normalize radius by max_angstroms to get on 0-1 scale, sin and cos are already on -1 to 1
+            radial_loss = F.mse_loss(Xrad / self.max_angstroms, Yrad / self.max_angstroms)  # linear scale
             azm_loss = self.circle_loss(Xazm, Yazm)
             pol_loss = self.circle_loss(Xplr, Yplr)
 
-            loss = (radial_loss * 0.5) + (azm_loss * 0.25) + (pol_loss * 0.25)
+            loss = 0.3 * radial_loss + 0.35 * azm_loss + 0.35 * pol_loss
 
         return output, loss
 

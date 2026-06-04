@@ -24,7 +24,7 @@ Note: "Ligand" and "drug" will be used interchangeably. A ligand is just somethi
 
 ---
 
-## "Radial" Sequencing
+## (Inverse) Radial Sequencing
 I imagined the space around an arbitary drug centroid as a series of spherical shells, with each sequential shell's radius increasing. 
 Think of a glass ball within a glass ball many times over, with the outermost glass ball being the largest and vice versa.
 I've characterized 3D protein binding pockets as "radial" sequences of AA identities and their spherical coordinates ordered by decreasing shell radius. 
@@ -39,9 +39,12 @@ I've attempted to draw and visualize my conceptualization of this here:
 Resulting "radial sequences" are presented as such during training with the goal of autoregressively predicting the next set of vectors.
 ```
 [[[AA identity 1], [rad1, az1, pl1]], [[AA identity 2], [rad2, az2, pl2]] .... [[VOID], [0, 0, 0]]]
-         # radius, azimuth, polar                            # end "tokens"
+              # radius, azimuth, polar                                            # end "token"
 ```
 Coordinates consist of radius value in angstroms, azimuth and polar angles computed from relative XYZ values. 
+
+The choice to go outward -> inward was deliberate as I wanted the resulting transformers to have as much information
+as possible before placing amino acids within the closest proximity to the ligand.
 
 **Sequencing Concept Logic:**
 Imagine an observer object exploring the entire protein pocket space shell by shell, recording each subsequent amino 
@@ -49,13 +52,13 @@ acid's (decreasing) radius to the ligand centroid until the last amino acid's da
 The very end of each sequence is padded with a "VOID" identity and a spherical coordinate of zeros, which conceptually 
 is the "end" of the sequence as that's where the ligand centroid is and a protein absolutely cannot exist there.
 
-Each amino acid identity is mapped to its hand-curated unique biochemical feature vector downstream.
+Each amino acid identity is then mapped to its hand-curated unique biochemical feature vector downstream.
 Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
 
 ---
 
 ## Data + Training
-Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle distance for Skeleton. NAAnoBot's loss is (not defined right now) composed of a hybrid between MSE and Euclidean distance between feature vectors.
+Data is resolved protein-drug complexes from BindingDB and PDB, with loss defined as a composite across MSE of radius and unit circle angle difference for Skeleton. NAAnoBot's loss is MSE between feature vectors.
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows.
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecules non-existent in training data, 
@@ -81,9 +84,9 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 60.932      | n/a              | n/a       |
-| 1       | 0.840       | 0.229            | -0.611    |
-| 2       | 0.          | 0.               |           |
+| Initial | 0.691       | n/a              | n/a       |
+| 1       | 0.          | 0.               | -0.       |
+| 2       | 0.          | 0.               | -0.       |
 | 3       | 0.          | 0.               |           |
 
 ---

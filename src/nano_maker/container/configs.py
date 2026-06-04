@@ -1,4 +1,4 @@
-skeleton_weights = "skeleton_e3.pt"
+skeleton_weights = "skeleton_prototype.pt"
 naanobot_weights = "naanobot_e3.pt"
 
 # globals
@@ -11,11 +11,6 @@ map4_res = 1024
 radial_config = {
     'max_angstroms': max_angstroms,
     'radial_resolution': radial_resolution,
-}
-
-naano_config = {
-    'max_angstroms': max_angstroms,
-    'block_size': block_size,
 }
 
 skeleton_config = {

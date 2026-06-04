@@ -8,6 +8,7 @@
 # put stuff in nAAno_library for physicochemical analysis
 from src.nano_maker.modules.nAAno.naanolibrary import *
 import torch
+import torch.nn.functional as F
 
 class NAAnoEng:
     """Run this everytime we need a new set of feature vectors"""
@@ -15,6 +16,7 @@ class NAAnoEng:
         self.max_angstroms = max_angstroms
         self.block_size = block_size
         self.verbose = verbose
+
 
     def initialize(self):
         self.nAAno_vectors = {aa_id: self.build_nAAnoVector(aa_id) for aa_id in AA_IDS}
@@ -56,14 +58,14 @@ class NAAnoEng:
 
         # embedding scheme, MAKE SURE TO UPDATE THIS IF YOU EVER UPDATE NAANOLIBRARY
         naano_vector = [
-            MOLECULAR_WEIGHTS[aa_id] * 100,  # scale up molecular weights by a lot, all in 0.1 range
-            NET_CHARGES[aa_id] * 5,  # scale up charge
-            ISOELECTRIC_PTS[aa_id],
-            HYDROPHOBICITY_IDXS[aa_id] * 10, # same thing
-            # generally we want all of them to be on a whole number ish scale
+            MOLECULAR_WEIGHTS[aa_id] * 5,
+            NET_CHARGES[aa_id],
+            ISOELECTRIC_PTS[aa_id] / 14,
+            HYDROPHOBICITY_IDXS[aa_id],
+            # generally we want all of them to be on the same scale
         ]
         naano_vector += FUNCTIONAL_FP[aa_id]
-        naano_vector += [p * 10 for p in PROPENSITIES[aa_id]]
+        naano_vector += PROPENSITIES[aa_id]
         return naano_vector
 
     # generation + training data processing
@@ -102,16 +104,22 @@ class NAAnoEng:
         return torch.cat([bioch_tensor, relative_vect, euclidean,
                           unit_dir, r_diff, az_diff, pl_diff], dim=-1)
 
-    def approx_id(self, vector):
-        min_error = float('inf')
-        approximate_identity = None
-        vector = vector.detach().float().squeeze()
-        for aa_id, n_v in self.nAAno_vectors.items():
-            n_v_tensor = torch.tensor(n_v, dtype=torch.float32)
-            error = torch.norm(vector - n_v_tensor).item()
-            if error < min_error:
-                min_error = error
-                approximate_identity = aa_id
+    # INFERENCE / PROTEIN POCKET SYNTHESIS
+    def approx_id(self, pred_vector):
+        # note -> add in temperature sampling | getting monotonous outputs right now
+        with torch.no_grad():
+            min_error = float('inf')
+            approximate_identity = None
+            pred_vector = pred_vector.detach().float().squeeze()
+            for aa_id, n_v in self.nAAno_vectors.items():
+                n_v_tensor = torch.tensor(n_v, dtype=torch.float32)
+
+                # mimic loss function in naanobot for amino acid selection
+                error = F.mse_loss(pred_vector, n_v_tensor)
+
+                if error < min_error:
+                    min_error = error
+                    approximate_identity = aa_id
 
         return approximate_identity
 
@@ -145,4 +153,4 @@ def encoder_check(verbose=True):
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
-# encoder_check()  # note: all good
+encoder_check()  # note: all good

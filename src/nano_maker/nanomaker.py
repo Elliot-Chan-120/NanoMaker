@@ -12,7 +12,7 @@ from src.nano_maker.naanobot import NAAnoBot
 
 class NanoMaker:
 
-    def __init__(self, skeleton_weight_filename, skeleton_cfg, naanobot_weight_filename, naanobot_config, radial_cfg, naano_config):
+    def __init__(self, skeleton_weight_filename, skeleton_cfg, naanobot_weight_filename, naanobot_config, radial_cfg):
         # INITIALIZE SKELETON =========================================================================================
         sk_cfg = skeleton_cfg.copy()
 
@@ -42,7 +42,7 @@ class NanoMaker:
         self._NAAnoBotPrototype.load_state_dict(nnbot_prototype_weights["model_state_dict"])
 
         # global fingerprint variable for future ingest
-        self.map4_fingerprint = None
+        self._map4_fingerprint = None
 
         # radial  ======================================================================================================
         self._RadialSeeker = RadialSeeker(radial_resolution=radial_cfg['radial_resolution'],
@@ -56,24 +56,26 @@ class NanoMaker:
         """easier to overwrite"""
         rules_passed = eval_lipinski(smiles)
         self.map4_fingerprint = torch.tensor(smiles_fingerprint(smiles), dtype=torch.float32).unsqueeze(0)
+        print(f"Chemical Ingested: {smiles}")
+        print(f"Drug Likeness Rules Passed: {rules_passed} / 4")
 
-    def generate(self):
+    def generate_pocket_data(self):
         """
         Accepts chemical in smiles format, roughly screens it for drug likeness then outputs a 3D coordinate map for proteins
         :return:
         """
         if self.map4_fingerprint is not None:   # make sure NanoMaker has ingested something
-            pocket_sph_skeleton = self.pocket_sph_skeleton()
+            pocket_sph_skeleton = self._pocket_sph_skeleton()
         else:
             return ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
 
-        skeleton = self.pocket_xyz_skeleton(pocket_sph_skeleton)
+        skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
         aa_ids = self._NAAnoBotPrototype.generate(self.map4_fingerprint, pocket_sph_skeleton)
 
         return skeleton, aa_ids   # just did a quick check, they both print out the same thing. holy crap I actually did it.
 
 
-    def pocket_sph_skeleton(self):
+    def _pocket_sph_skeleton(self):
         raw_skeleton = self._SkeletonPrototype.generate(self.map4_fingerprint)   # initial processing -> turn into a regular python list
         process_skeleton = [vector.detach().flatten().tolist() for vector in raw_skeleton]
 
@@ -86,7 +88,7 @@ class NanoMaker:
 
         return sph_skeleton
 
-    def pocket_xyz_skeleton(self, sph_skeleton):
+    def _pocket_xyz_skeleton(self, sph_skeleton):
         # translate from spherical coordinate system to xyz coordinates
         pocket_skeleton = [self._RadialSeeker.radial_to_xyz(vector) for vector in sph_skeleton]
         return pocket_skeleton

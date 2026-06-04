@@ -62,14 +62,8 @@ class NAAnoBot(nn.Module):
             # first 4 -> physicochemical -> removed half life
             # 13 -> functional group fingerprint (one-hot)
             # 4 structural propensity
-            physicochemical_loss = F.mse_loss(output[:, :4],
-                                              targets[:, :4])
-            functional_loss = F.binary_cross_entropy_with_logits(output[:, 4:17],
-                                                                 targets[:, 4:17])
-            structural_loss = F.mse_loss(output[:, 17:],
-                                         targets[:, 17:])
-
-            loss = physicochemical_loss * 0.333 + functional_loss * 0.333 + structural_loss * 0.333
+            loss = F.mse_loss(output, targets)
+            # no more partitioning into two MSE and one BCE, was previously hiding performance bottleneck
 
         return output, loss
 

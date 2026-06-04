@@ -24,7 +24,7 @@ MOLECULAR_WEIGHTS = {
     'V': 0.12,
     'W': 0.20,
     'Y': 0.18,
-    'VOID': -0.1
+    'VOID': -0.2
 }
 
 # net charges at physiological pH ~7.4
@@ -75,7 +75,7 @@ ISOELECTRIC_PTS = {
     'V': 5.97,
     'W': 5.94,
     'Y': 5.66,
-    'VOID': 0.00,
+    'VOID': 0,
 }
 
 # hydrophobicity levels - pH 7
@@ -103,9 +103,9 @@ HYDROPHOBICITY_IDXS = {
     'V': 0.76,
     'W': 0.97,
     'Y': 0.63,
-    'VOID': -2,
+    'VOID': -1,
 }
-# reference for the above: see GEM README.md
+# reference for the above: see GEM's README.md
 
 
 # Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), + biochemistry notes
@@ -158,7 +158,7 @@ PROPENSITIES = {
     'V': [0.84, 1.90, 0.58, 0.82],
     'W': [1.13, 1.19, 0.78, 0.86],
     'Y': [0.98, 1.39, 0.78, 1.02],
-    'VOID': [0, 0, 0, 0],
+    'VOID': [-1, -1, -1, -1],
 }
 
 # Analysis of Domain-Swapped Oligomers Reveals Local Sequence Preferences and Structural Imprints at the Linker Regions and Swapped Interfaces - Scientific Figure on ResearchGate.
