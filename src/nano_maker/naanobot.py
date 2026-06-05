@@ -59,11 +59,10 @@ class NAAnoBot(nn.Module):
 
         loss = None
         if targets is not None:
-            # split up loss into various parts
             # notes:
             # first 4 -> physicochemical -> removed half life
-            # 13 -> functional group fingerprint (one-hot)
-            # 4 structural propensity
+            # 7 chemical features -> n_C, n_N, n_O, n_S, n_H, aromatic, n_resonance E-
+            # 4 structural propensity scores for various 2ndary structs
             loss = F.mse_loss(output, targets)
             # no more partitioning into two MSE and one BCE, was previously hiding performance bottleneck
 

@@ -30,5 +30,10 @@ AAs that didn't have anything special going on (nonpolar) were all 0s, (non-)pol
 13 5-membered ring, 
     - P
 
+UPDATE: CONDENSING THIS DOWN
+-> n_RINGS, n_SULFUR, n_NITROGEN
+- nitrogens that aren't the amino
+# proline is the only aa with a ring and no aromatics
+# C and M have different n_sulfur because C has disulfide bridges and I wanted to distinguish that
 
 Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), + biochemistry notes

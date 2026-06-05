@@ -74,18 +74,17 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial |             | n/a              | n/a       |
-| 1       | 0.          | 0.               | -0.       |
-| 2       | 0.          | 0.               | -0.       |
-| 3       | 0.          | 0.               | -0.       |
-
+| Initial | 44.884      | n/a              | n/a       |
+| 1       | 0.618       | 0.388            | -0.23     |
+| 2       | 0.398       | 0.262            | -0.14     |
+| 3       | 0.285       | 0.232            | -0.053    |
 
 
 **NAAnoBot Loss**
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 0.861       | n/a              | n/a       |
+| Initial | 0.593       | n/a              | n/a       |
 | 1       | 0.0         | 0.0              | -0.       |
 NAAnoBot's batch-level training loss reached 0.-0. by epoch end, with a
 validation loss of 0. and a train loss of 0. (running average).

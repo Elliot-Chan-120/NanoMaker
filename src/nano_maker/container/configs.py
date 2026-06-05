@@ -1,4 +1,4 @@
-skeleton_weights = "skeleton_prototype.pt"
+skeleton_weights = "skeleton_E3I1.pt"
 naanobot_weights = "naanobot_I2.pt"
 
 # globals

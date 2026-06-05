@@ -26,7 +26,11 @@ class NAAnoEng:
         return True
 
     def n_features(self):
-        return len(self.nAAno_vectors['A'])
+        length = len(self.nAAno_vectors['A'])
+        for aa, vector in self.nAAno_vectors.items():
+            if len(vector) != length:
+                raise ValueError(f"nAAno token lengths are not aligned. Check naanolibrary for inconsistent entries.")
+        return length
 
     def get_aa_id(self, naano_vector):
         aa_id = None
@@ -64,8 +68,8 @@ class NAAnoEng:
             HYDROPHOBICITY_IDXS[aa_id],
             # generally we want all of them to be on the same scale
         ]
-        naano_vector += FUNCTIONAL_FP[aa_id]
-        naano_vector += PROPENSITIES[aa_id]
+        naano_vector += [sc_fp for sc_fp in SIDE_CHAIN_FINGERPRINT[aa_id]]
+        naano_vector += [p / 1.9 for p in PROPENSITIES[aa_id]]  # divide by the max - keep it within -1 <-> 1
         return naano_vector
 
     # generation + training data processing
@@ -142,8 +146,6 @@ def encoder_check(verbose=True):
     module.initialize()
     for aa_code, aa_vect in module.nAAno_vectors.items():
         print(f"{aa_code} -- {aa_vect}")
-    print(f"{module.n_features()} features")
-
     # check decoder and encoder
     for aa in AA_IDS:
         aa_str = aa
@@ -153,4 +155,6 @@ def encoder_check(verbose=True):
                 print(f"{aa_str}: str <-> vect aligned")
         else:
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
+
+    print(f"{module.n_features()} features")
 encoder_check()  # note: all good
