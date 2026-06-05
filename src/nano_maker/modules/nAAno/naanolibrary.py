@@ -108,7 +108,7 @@ HYDROPHOBICITY_IDXS = {
 # reference for the above: see GEM's README.md
 
 
-# Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), + biochemistry notes
+# Reference: Biochemistry: Paul Jay Friedman (Fifth Edition), + my biochemistry notes
 # pseudo molecular fingerprint accounting for biochemical / functional group standout features
 # check function_fp_scheme.txt for more understanding
 # n_C, n_O, n_N, n_S, n_H, n_Aromatic, n_resonancepairs (lone pairs and pi bonds)

@@ -159,4 +159,4 @@ def encoder_check(verbose=True):
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
 
     print(f"{module.n_features()} features")
-encoder_check()  # note: all good
+# encoder_check()  # note: all good
