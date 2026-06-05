@@ -111,23 +111,34 @@ class NAAnoEng:
 
 
     # INFERENCE / PROTEIN POCKET SYNTHESIS
-    def approx_id(self, pred_vector):
+    def approx_id(self, pred_vector, temperature):
+        """
+        amino acid picker, converts error between amino acids into probabilities that are used to sample amino acids
+        :param pred_vector:
+        :param temperature:
+        :return:
+        """
         # note -> add in temperature sampling | getting monotonous outputs right now
         with torch.no_grad():
-            min_error = float('inf')
-            approximate_identity = None
+            aa_ids = [aa_id for aa_id in AA_IDS if aa_id != "VOID"]  # take out the VOID token
+            n_v_tensor = torch.tensor([self.nAAno_vectors[aa_id] for aa_id in aa_ids], dtype=torch.float32)
+
+
             pred_vector = pred_vector.detach().float().squeeze()
-            for aa_id, n_v in self.nAAno_vectors.items():
-                n_v_tensor = torch.tensor(n_v, dtype=torch.float32)
+            # mimic loss function in naanobot for amino acid selection
+            errors = ((pred_vector.squeeze(0) - n_v_tensor) ** 2).mean(dim=1)
+            logits = -errors / temperature
 
-                # mimic loss function in naanobot for amino acid selection
-                error = F.mse_loss(pred_vector, n_v_tensor)
+            # I want error to dicate the probability of being chosen
+            # less error = more likely % vice versa
+            # during testing without temp sampling -> just choosing the most "optimal" amino acid
+            # monotonous, no variety that is biochemically observable irl
+            # need to introduce diversity to mimic real life pockets
 
-                if error < min_error:
-                    min_error = error
-                    approximate_identity = aa_id
+            probs = F.softmax(logits, dim=-1)
+            idx = torch.multinomial(probs, num_samples=1).item()
 
-        return approximate_identity
+        return aa_ids[idx]
 
 
     @staticmethod

@@ -7,7 +7,7 @@ A personal research prototype, NanoMaker is a dual cross-attention transformer s
 that would form a high-affinity binding pocket to any given chemical in SMILES format. 
 These can then be used as protein pocket patch templates for drug-delivery molecules.
 
-NanoMaker separates the challenge of protein pocket design into two transformer tasks. 
+NanoMaker separates the challenge of protein pocket design into two cross-attention transformer tasks. 
 Model 1, **Skeleton**, creates the 3D spatial arrangement / skeleton of the upcoming protein cage, 
 while model 2, **NAAnoBot**, slots amino acids (AAs) into the empty coordinates based on biochemical and spatial compatibility.
 Both transformers are cross-attention models conditioned on drug structure, 
@@ -120,7 +120,7 @@ Total SMILES were split 80% into training and 20% into validation prior to seque
 Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecule identities non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
-**Please read the disclaimer at the bottom regarding novel chemistry generalization ability.**
+See Disclaimer at the bottom regarding novel chemistry generalization ability.
 
 ---
 
@@ -133,12 +133,12 @@ Training loss was computed as a running average over all batches, hence why the 
 0.25 * radial loss + 0.375 * azimuth loss + 0.375 * polar loss
 ```
 
-| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
-|---------|----------|------------------|-----------|
-| Initial | 44.884   | n/a              | n/a       |
-| 1       | 0.618    | 0.388            | -0.23     |
-| 2       | 0.398    | 0.262            | -0.14     |
-| 3       | 0.       | 0.232            | -0.053    |
+| Epoch   | Train (3sf) | Validation (3sf)   | Gap (2sf) |
+|---------|-------------|--------------------|-----------|
+| Initial | 23.0516     | n/a                | n/a       |
+| 1       | 0.          | 0.                 | -0.       |
+| 2       | 0.          | 0.                 | -0.       |
+| 3       | 0.          | 0.                 | -0.       |
 
 **NAAnoBot Loss**: 
 ```
@@ -148,13 +148,14 @@ MSE of predicted feature vector and target amino acid feature vector
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 0.585       | n/a              | n/a       |
-| 1       | 0.0         | 0.0              | -0.       |
-NAAnoBot's batch-level training loss reached 0.-0. by epoch end, with a
-validation loss of 0. and a train loss of 0. (running average).
-Considering the 15-dimensional feature vector, the calculated RMSE of 0.
+| 1       | 0.0156      | 0.00196          | -0.136    |
+NAAnoBot's batch-level training loss reached 0.004-0.0015 by epoch end, with a
+validation loss of 0.001959 and a train loss of 0.015596 (running average).
+Considering the 15-dimensional feature vector, the calculated RMSE of 0.0443 (3sf)
 was deemed near-noise-floor error, and further training was deliberately avoided
 to preserve generation diversity. Amino acid sampling is done via temperature sampling to
-further preserve biochemical diveristy.
+further preserve biochemical diveristy by translating biochemical vector vs. potential 
+AA to a probability distribution (think logits and tokens in NLP).
 
 TODO: 
 - Loss Curves

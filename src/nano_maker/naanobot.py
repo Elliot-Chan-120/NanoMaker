@@ -90,7 +90,7 @@ class NAAnoBot(nn.Module):
             naano_X = self.naano_module.get_nAAno_X(coord_context, bioch_context, coordinate).unsqueeze(0)
 
             output, _ = self.forward(naano_X, map4_enc)
-            aa_id = self.naano_module.approx_id(output)
+            aa_id = self.naano_module.approx_id(output, temperature=temperature)
 
             aa_order.append(aa_id)
 
