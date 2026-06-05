@@ -68,7 +68,7 @@ class NanoMaker:
     # allow option to save data as a "radial" file and load it as a radial sequence
     # -> file must contain target SMILES as title up top as a header ">" kinda like fasta idk
     # allow option to visualize a "radial file"
-    def generate_pocket_data(self):
+    def generate_pocket_data(self, temperature):
         """
         Accepts chemical in smiles format, roughly screens it for drug likeness then outputs a 3D coordinate map for proteins
         Use this for data generation for visualization or file saving
@@ -80,9 +80,10 @@ class NanoMaker:
             return ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
 
         skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
-        aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton)
+        aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, temperature=temperature)
 
         pocket_data = {"SMILES": self._smiles,
+                       "Temperature": temperature,
                        "3D_skeleton": skeleton,
                        "aa_ids": aa_ids}
         # radial sequence

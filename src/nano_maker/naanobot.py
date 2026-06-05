@@ -69,11 +69,12 @@ class NAAnoBot(nn.Module):
         return output, loss
 
 
-    def generate(self, map4_enc, sph_coordinates):
+    def generate(self, map4_enc, sph_coordinates, temperature):
         """
         Feed it a list of spherical coordinates, and have them converted to what is done in
         :param map4_enc:
         :param sph_coordinates:
+        :param temperature: determines sampling optimization level
         :return:
         """
         map4_enc = map4_enc.to(next(self.parameters()).device)

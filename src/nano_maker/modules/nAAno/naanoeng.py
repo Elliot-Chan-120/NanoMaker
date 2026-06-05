@@ -93,20 +93,22 @@ class NAAnoEng:
         # workaround the batch processing nature -> add dimension at 0th then undo
         xyz_Y = self.sph_to_xyz(coord_Y_tensor.unsqueeze(0)).squeeze(0)
 
-        relative_vect = xyz_X - xyz_Y.unsqueeze(0)   # 3
-        euclidean = (torch.norm(relative_vect, dim=-1, keepdim=True) + 1e-8) # 1
+        relative_vect = xyz_X - xyz_Y.unsqueeze(0)  # 3
+        euclidean = (torch.norm(relative_vect, dim=-1, keepdim=True) + 1e-8)  # 1
         unit_dir = relative_vect / euclidean  # 3
 
-        r_diff = (coord_Y_tensor[0] - coord_X_tensor[:, 0]).unsqueeze(1) # 1
-        az_diff = self.angle_diff(coord_X_tensor[:, 1], coord_Y_tensor[1]).unsqueeze(1) # 1
-        pl_diff = self.angle_diff(coord_X_tensor[:, 2], coord_Y_tensor[2]).unsqueeze(1) # 1
+        r_diff = (coord_Y_tensor[0] - coord_X_tensor[:, 0]).unsqueeze(1)  # 1
+        az_diff = self.angle_diff(coord_X_tensor[:, 1], coord_Y_tensor[1]).unsqueeze(1)  # 1
+        pl_diff = self.angle_diff(coord_X_tensor[:, 2], coord_Y_tensor[2]).unsqueeze(1)  # 1
 
         # nAAno "token" = 22
         # spatial + 10
         # total features is 32 -> output 22 on linear head
+        return torch.cat([bioch_tensor, relative_vect / self.max_angstroms, euclidean / self.max_angstroms,
+                          unit_dir, r_diff / self.max_angstroms, az_diff / 4, pl_diff / 4], dim=-1)
+        # normalize angstrom-related metrics by self.max_angstroms
+        # normalize angular metrics by 4 -> thats the max range, brings everything down to 0-1
 
-        return torch.cat([bioch_tensor, relative_vect, euclidean,
-                          unit_dir, r_diff, az_diff, pl_diff], dim=-1)
 
     # INFERENCE / PROTEIN POCKET SYNTHESIS
     def approx_id(self, pred_vector):

@@ -70,25 +70,30 @@ meaning that the models learn actual relationships b/w 3D arrangement, biochemis
 Each model went through 3 epochs across the same train / validation drug identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
-**Skeleton Loss**
+**Skeleton Loss**: 
+```
+0.25 * radial loss + 0.375 * azimuth loss + 0.365 * polar loss
+```
+
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+|---------|----------|------------------|-----------|
+| Initial | 44.884   | n/a              | n/a       |
+| 1       | 0.618    | 0.388            | -0.23     |
+| 2       | 0.398    | 0.262            | -0.14     |
+| 3       | 0.       | 0.232            | -0.053    |
+
+**NAAnoBot Loss**: 
+```
+MSE of predicted feature vector and target amino acid feature vector
+```
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 44.884      | n/a              | n/a       |
-| 1       | 0.618       | 0.388            | -0.23     |
-| 2       | 0.398       | 0.262            | -0.14     |
-| 3       | 0.285       | 0.232            | -0.053    |
-
-
-**NAAnoBot Loss**
-
-| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
-|---------|-------------|------------------|-----------|
-| Initial | 0.593       | n/a              | n/a       |
+| Initial | 0.585       | n/a              | n/a       |
 | 1       | 0.0         | 0.0              | -0.       |
 NAAnoBot's batch-level training loss reached 0.-0. by epoch end, with a
 validation loss of 0. and a train loss of 0. (running average).
-Considering the 21-dimensional feature vector, the calculated RMSE of 0.
+Considering the 15-dimensional feature vector, the calculated RMSE of 0.
 was deemed near-noise-floor error, and further training was deliberately avoided
 to preserve generation diversity. Amino acid sampling is done via temperature sampling to
 further preserve biochemical diveristy.
