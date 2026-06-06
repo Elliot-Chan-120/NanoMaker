@@ -53,7 +53,7 @@ most important AAs to stabilize / bind.
 Imagine an observer object exploring the entire protein pocket space shell by shell, recording each subsequent amino 
 acid's (decreasing) radius to the ligand centroid until the last amino acid's data is recorded.
 The very end of each sequence is padded with a "VOID" identity and a spherical coordinate of zeros, which conceptually 
-is the "end" of the sequence as that's where the ligand centroid is and a protein absolutely cannot exist there.
+is the "end" of the sequence as that's where the drug centroid is and a protein absolutely cannot exist there.
 Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
 
 
@@ -68,7 +68,7 @@ prior to amino acid insertion into said pocket, hence the name "Skeleton".
 
 When presented with a chemical compound, it will say: "the protein cage surrounding this 
 molecule should look like this". It then generates a series of spherical coordinate vectors, with each
-corresponding to a "blank" amino acid's alpha carbon's placement relative to the chemical compound's centroid (Figure 1).
+corresponding to a "blank" amino acid's alpha carbon placement relative to the drug compound's centroid (Figure 1).
 
 note: alpha carbon = main carbon of amino acid
 
@@ -113,7 +113,9 @@ It does this continuously for each provided coordinate until the protein pocket 
 ---
 
 ## Data + Training
-Data is resolved protein-drug complexes from BindingDB and PDB with binding affinities of 0.1nM (extremely high affinity). Loss was defined as a composite across MSE of radius and unit circle angle difference for Skeleton. NAAnoBot's loss is MSE between predicted feature vectors and the target AA's feature vector (nAAno_token!).
+Data is resolved protein-drug complexes from BindingDB and PDB with binding affinities of 0.1nM (extremely high affinity). 
+Skeleton's loss was defined as a composite across MSE of radius and unit circle angle difference, with weighted emphasis on anglular orientation. 
+NAAnoBot's loss is MSE between predicted feature vectors and the target AA's feature vector (nAAno_token!).
 The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows. 
 
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
@@ -124,7 +126,7 @@ See Disclaimer at the bottom regarding novel chemistry generalization ability.
 
 ---
 
-## Model Performance and Behaviour: Loss & Pocket Biochemistry
+## Model Performance and Behaviour: Loss & Model Health
 Each model went through 3 epochs across the same train / validation drug identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
@@ -148,14 +150,13 @@ MSE of predicted feature vector and target amino acid feature vector
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 0.585       | n/a              | n/a       |
-| 1       | 0.0156      | 0.00196          | -0.136    |
+| 1       | 0.0156      | 0.00196          | -0.0136   |
 NAAnoBot's batch-level training loss reached 0.004-0.0015 by epoch end, with a
 validation loss of 0.001959 and a train loss of 0.015596 (running average).
-Considering the 15-dimensional feature vector, the calculated RMSE of 0.0443 (3sf)
+Considering the 15-dimensional scaled feature vectors, the calculated RMSE of 0.0443 (3sf)
 was deemed near-noise-floor error, and further training was deliberately avoided
 to preserve generation diversity. Amino acid sampling is done via temperature sampling to
-further preserve biochemical diveristy by translating biochemical vector vs. potential 
-AA to a probability distribution (think logits and tokens in NLP).
+further preserve biochemical diversity by translating output vector errors to a probability distribution (think logits and tokens in NLP).
 
 TODO: 
 - Loss Curves
@@ -169,13 +170,14 @@ Generated protein pockets do not account for orientation of both the ligand or t
 The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
 Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.
 
-**Generalization to structurally novel scaffolds may be overestimated by validation loss**, as lead optimization series in overall data means the model may have seen many analogues of common drug scaffolds across the train and validation split.
+**Generalization to structurally novel scaffolds may be overestimated by validation loss**, as lead optimization series in overall data means the model may have seen many 
+analogues of common drug scaffolds across the train and validation split.
 True zero-shot capability on novel chemistry would require further validation and more intensive data curation, via train-test splitting by drug scaffold rather than true identity.
 
 There may also exist the possibility that the pockets generated might resemble certain pathogenic molecules since that's what the training data comprised of.
 However, I should note that there is a distinction between:
 - Pathogenic active / binding sites: exist within a pathogen + performs harmful function, comprised of more complex structures
-- NanoMaker-generated pockets: 3D-designed pocket with the sole purpose of high binding affinity
+- NanoMaker-generated pockets: 3D-designed binding pocket with the sole purpose of high binding affinity
 
 ---
 
