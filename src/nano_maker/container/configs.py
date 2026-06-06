@@ -1,4 +1,7 @@
-skeleton_weight_filename = "skeleton_E3I1.pt"
+skeleton_weight_filename = "skeleton_E1I2.pt"
+# e3i1 -> radius emphasized error, less angular accuracy
+# e3i2 -> angular emphasized error: use this one
+
 naanobot_weight_filename = "naanobot_E1I3.pt"
 
 # globals
