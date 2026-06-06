@@ -151,6 +151,7 @@ MSE of predicted feature vector and target amino acid feature vector
 |---------|-------------|------------------|-----------|
 | Initial | 0.585       | n/a              | n/a       |
 | 1       | 0.0156      | 0.00196          | -0.0136   |
+
 NAAnoBot's batch-level training loss reached 0.004-0.0015 by epoch end, with a
 validation loss of 0.001959 and a train loss of 0.015596 (running average).
 Considering the 15-dimensional scaled feature vectors, the calculated RMSE of 0.0443 (3sf)
