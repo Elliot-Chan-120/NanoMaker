@@ -60,7 +60,7 @@ class Skeleton(nn.Module):
             azm_loss = self.circle_loss(Xazm, Yazm)
             pol_loss = self.circle_loss(Xplr, Yplr)
 
-            loss = 0.25 * radial_loss + 0.375 * azm_loss + 0.375 * pol_loss
+            loss = 0.1 * radial_loss + 0.45 * azm_loss + 0.45 * pol_loss
             # model was actually learning something when values weren't normalized for some reason
             # emphasize angles more than radius loss -> previous run diagnostic showed roughly 1.3% error for radius
             # but ~10x for angular error: 11 and 13%

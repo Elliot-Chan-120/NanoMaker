@@ -75,7 +75,7 @@ class NAAnoBot(nn.Module):
             # use cross entropy on them
             # spherical projection
             pred_norm = F.normalize(output, dim=-1)
-            aa_norm = F.normalize(self.naano_tensors, dim=-1)
+            aa_norm = F.normalize(self.naano_tensors.to(nAAno_context.device), dim=-1)
             logits = pred_norm @ aa_norm.T / self.loss_temp
 
             id_loss = F.cross_entropy(logits, target_idx)

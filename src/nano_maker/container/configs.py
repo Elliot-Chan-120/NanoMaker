@@ -1,4 +1,4 @@
-skeleton_weight_filename = "skeleton_E2I2.pt"
+skeleton_weight_filename = "skeleton_E3I3.pt"
 # e3i1 -> radius emphasized error, less angular accuracy
 # e3i2 -> angular emphasized error: use this one
 
@@ -7,7 +7,7 @@ naanobot_weight_filename = "naanobot_E1I3.pt"
 # globals
 max_angstroms = 33
 radial_resolution = 100
-block_size = 75
+block_size = 64   # 95th percentile was 67 aas so setting max context to this should be standard.
 map4_res = 1024
 
 
