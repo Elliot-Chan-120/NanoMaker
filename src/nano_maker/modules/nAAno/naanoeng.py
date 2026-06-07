@@ -70,6 +70,7 @@ class NAAnoEng:
             ISOELECTRIC_PTS[aa_id] / 14,
             HYDROPHOBICITY_IDXS[aa_id],
             RSA_THEORETICAL[aa_id],
+            VOL_A[aa_id]
             # generally we want all of them to be on the same scale
         ]
         naano_vector += [sc_fp for sc_fp in SIDE_CHAIN_FINGERPRINT[aa_id]]
@@ -136,8 +137,11 @@ class NAAnoEng:
 
             pred_vector = pred_vector.detach().float().squeeze()
             # mimic loss function in naanobot for amino acid selection
-            errors = ((pred_vector.squeeze(0) - n_v_tensor) ** 2).mean(dim=1)
-            logits = -errors / sampling_temperature
+            pred_norm = F.normalize(pred_vector.unsqueeze(0), dim=-1)
+            aa_norm = F.normalize(n_v_tensor, dim=-1)
+
+            affinities = (pred_norm @ aa_norm.T).squeeze(0)
+            logits = affinities / sampling_temperature
 
             # I want error to dicate the probability of being chosen
             # less error = more likely % vice versa
