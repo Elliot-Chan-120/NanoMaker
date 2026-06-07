@@ -10,6 +10,7 @@ from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
 class NAAnoBot(nn.Module):
     def __init__(self, n_embd, n_head, n_layers, block_size,
                  map4_res, max_angstroms, n_spatial_features,
+                 loss_temperature,
                  dropout):
         super().__init__()
         self.block_size = block_size
@@ -20,11 +21,13 @@ class NAAnoBot(nn.Module):
                                      verbose=False)
         self.naano_module.initialize()
         n_nAAno_features = self.naano_module.n_features()
+        self.naano_tensors = self.naano_module.nAAno_tensors
 
         self.n_nAAno_features = n_nAAno_features
         self.n_spatial_features = n_spatial_features
         total_features = self.n_nAAno_features + self.n_spatial_features
 
+        self.loss_temp = loss_temperature
 
 
         # layers + architecture
@@ -39,7 +42,7 @@ class NAAnoBot(nn.Module):
         self.nAAno_head = nn.Linear(n_embd, n_nAAno_features)
 
 
-    def forward(self, nAAno_context, map4_enc, targets=None):
+    def forward(self, nAAno_context, map4_enc, targets=None, target_idx=None):
         """
         nAAno_context will be [n_batch, block_size, n_features + 3]
         targets is [n_batch, 1, n_features]
@@ -58,23 +61,39 @@ class NAAnoBot(nn.Module):
         output = self.nAAno_head(self.ln_f(x[:, -1, :]))
 
         loss = None
-        if targets is not None:
+        if targets is not None and target_idx is not None:
             # notes:
             # first 4 -> physicochemical -> removed half life
             # 7 chemical features -> n_C, n_N, n_O, n_S, n_H, aromatic, n_resonance E-
             # 4 structural propensity scores for various 2ndary structs
-            loss = F.mse_loss(output, targets)
             # no more partitioning into two MSE and one BCE, was previously hiding performance bottleneck
+            # MSE alone was driving outputs towards the mean biochemically needed vector
+            # that would suit the molecular fingerprint, basically just a biochemical environment curator
+
+            # Iteration 4
+            # turn vector distance similarity towards amino acids into probabilities and logits
+            # use cross entropy on them
+            # spherical projection
+            pred_norm = F.normalize(output, dim=-1)
+            aa_norm = F.normalize(self.naano_tensors, dim=-1)
+            logits = pred_norm @ aa_norm.T / self.loss_temp
+
+            id_loss = F.cross_entropy(logits, target_idx)
+            cosine_loss = (1 - F.cosine_similarity(output, targets, dim=-1)).mean()
+
+            loss = (id_loss * 0.8) + (0.2*cosine_loss)   # because a few amino acids do share very similar traits
+                                                 # i want a slight cushion for biochemically similar but
+                                                 # identically incorrect predictions
 
         return output, loss
 
 
-    def generate(self, map4_enc, sph_coordinates, temperature):
+    def generate(self, map4_enc, sph_coordinates, sampling_temperature):
         """
         Feed it a list of spherical coordinates, and have them converted to what is done in
         :param map4_enc:
         :param sph_coordinates:
-        :param temperature: determines sampling optimization level
+        :param sampling_temperature: determines sampling optimization level
         :return:
         """
         map4_enc = map4_enc.to(next(self.parameters()).device)
@@ -90,7 +109,7 @@ class NAAnoBot(nn.Module):
             naano_X = self.naano_module.get_nAAno_X(coord_context, bioch_context, coordinate).unsqueeze(0)
 
             output, _ = self.forward(naano_X, map4_enc)
-            aa_id = self.naano_module.approx_id(output, temperature=temperature)
+            aa_id = self.naano_module.approx_id(output, sampling_temperature=sampling_temperature)
 
             aa_order.append(aa_id)
 

@@ -135,12 +135,12 @@ Training loss was computed as a running average over all batches, hence why the 
 0.25 * radial loss + 0.375 * azimuth loss + 0.375 * polar loss
 ```
 
-| Epoch   | Train (3sf) | Validation (3sf)   | Gap (2sf) |
-|---------|-------------|--------------------|-----------|
-| Initial | 23.0516     | n/a                | n/a       |
-| 1       | 0.          | 0.                 | -0.       |
-| 2       | 0.          | 0.                 | -0.       |
-| 3       | 0.          | 0.                 | -0.       |
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+|---------|-------------|------------------|-----------|
+| Initial | 23.0516     | n/a              | n/a       |
+| 1       | 0.723       | 0.389            | -0.333    |
+| 2       | 0.434       | 0.272            | -0.161    |
+| 3       | 0.          | 0.               | -0.       |
 
 **NAAnoBot Loss**: 
 ```

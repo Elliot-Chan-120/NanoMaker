@@ -1,4 +1,4 @@
-skeleton_weight_filename = "skeleton_E1I2.pt"
+skeleton_weight_filename = "skeleton_E2I2.pt"
 # e3i1 -> radius emphasized error, less angular accuracy
 # e3i2 -> angular emphasized error: use this one
 

@@ -16,10 +16,13 @@ class NAAnoEng:
         self.max_angstroms = max_angstroms
         self.block_size = block_size
         self.verbose = verbose
+        self.nAAno_vectors = None
+        self.nAAno_tensors = None
 
 
     def initialize(self):
         self.nAAno_vectors = {aa_id: self.build_nAAnoVector(aa_id) for aa_id in AA_IDS}
+        self.nAAno_tensors = torch.tensor([v for v in self.nAAno_vectors.values()], dtype=torch.float32)
 
         if self.verbose:
             print("NAAnoEng initialized")
@@ -66,10 +69,17 @@ class NAAnoEng:
             NET_CHARGES[aa_id],
             ISOELECTRIC_PTS[aa_id] / 14,
             HYDROPHOBICITY_IDXS[aa_id],
+            RSA_THEORETICAL[aa_id],
             # generally we want all of them to be on the same scale
         ]
         naano_vector += [sc_fp for sc_fp in SIDE_CHAIN_FINGERPRINT[aa_id]]
         naano_vector += [p / 1.9 for p in PROPENSITIES[aa_id]]  # divide by the max - keep it within -1 <-> 1
+        naano_vector += [rel_con for rel_con in RELATIVE_CONFORMATIONAL[aa_id]]
+        naano_vector += [abs_con for abs_con in ABSOLUTE_CONFORMATIONAL[aa_id]]
+        naano_vector += [con_soft for con_soft in CONFORMATIONAL_SOFTNESS[aa_id]]
+        naano_vector += [pka_fp for pka_fp in PKAs[aa_id]]
+        naano_vector += [h_pro for h_pro in H_PROFILE[aa_id]]
+
         return naano_vector
 
     # generation + training data processing
@@ -111,11 +121,11 @@ class NAAnoEng:
 
 
     # INFERENCE / PROTEIN POCKET SYNTHESIS
-    def approx_id(self, pred_vector, temperature):
+    def approx_id(self, pred_vector, sampling_temperature):
         """
         amino acid picker, converts error between amino acids into probabilities that are used to sample amino acids
         :param pred_vector:
-        :param temperature:
+        :param sampling_temperature:
         :return:
         """
         # note -> add in temperature sampling | getting monotonous outputs right now
@@ -127,7 +137,7 @@ class NAAnoEng:
             pred_vector = pred_vector.detach().float().squeeze()
             # mimic loss function in naanobot for amino acid selection
             errors = ((pred_vector.squeeze(0) - n_v_tensor) ** 2).mean(dim=1)
-            logits = -errors / temperature
+            logits = -errors / sampling_temperature
 
             # I want error to dicate the probability of being chosen
             # less error = more likely % vice versa
@@ -170,4 +180,4 @@ def encoder_check(verbose=True):
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
 
     print(f"{module.n_features()} features")
-# encoder_check()  # note: all good
+encoder_check()  # note: all good

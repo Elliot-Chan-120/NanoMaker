@@ -3,6 +3,7 @@ import pyarrow.parquet as pq
 import torch
 
 from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
+from src.nano_maker.modules.nAAno.naanolibrary import *
 
 # note: all coordinates are now on the spherical system
 # doesn't need to predict an "end" since that's covered by Skeleton
@@ -42,11 +43,12 @@ class NAAnoDataset(Dataset):
         # context
         molecular_fingerprint = self.smiles_molfp.loc[smiles, "map4_fp"]
         radial_sequence = self.pdb_radial.loc[pdb_id, "radial_sequence"]
-        nAAno_X, nAAno_Y = self.naano_XY(radial_sequence, target_idx)
+        nAAno_X, nAAno_Y, nAAno_Y_idx = self.naano_XY(radial_sequence, target_idx)
 
         return (molecular_fingerprint,
                 nAAno_X,  # we're already receiving it as a tensor
-                torch.tensor(nAAno_Y, dtype=torch.float32))
+                torch.tensor(nAAno_Y, dtype=torch.float32),
+                torch.tensor(nAAno_Y_idx, dtype=torch.long))
 
 
     def naano_XY(self, radial_sequence, target_idx):
@@ -77,6 +79,7 @@ class NAAnoDataset(Dataset):
             if idx == target_idx:
                 coord_Y = coords
                 naano_Y = nAAno_token
+                naano_Y_idx = AA_IDS.index(aa_id)
             else:
                 coord_context = coord_context[1:]+[coords]
                 bioch_context = bioch_context[1:]+[nAAno_token]
@@ -84,7 +87,4 @@ class NAAnoDataset(Dataset):
         # create final context matrix
         naano_X = self.naano_module.get_nAAno_X(coord_context, bioch_context, coord_Y)
 
-        return naano_X, naano_Y
-
-    # 22 biochemical features + 7 augmented relative spatial features
-    # 29 total -> 29 in embedding -> 22 linear head output
+        return naano_X, naano_Y, naano_Y_idx
