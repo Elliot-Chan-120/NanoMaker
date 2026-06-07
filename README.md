@@ -140,27 +140,22 @@ Training loss was computed as a running average over all batches, hence why the 
 | Initial | 23.0516     | n/a              | n/a         |
 | 1       | 0.723       | 0.389            | -0.333      |
 | 2       | 0.434       | 0.272            | -0.161      |
-| 3       | 0.294       | 0.0.217          | -0.0767     |
-
-Skeleton's error was further estimated to be a 1.37% error in radius, 
+| 3       | 0.294       | 0.217            | -0.0767     |
+ 
+Secondary evaluations showed Skeleton's error was further estimated to be a 1.37% error in radius, 
 and roughly 10-11% for the azimuthal and polar angles.
 
 **NAAnoBot Loss**: 
 ```
-MSE of predicted feature vector and target amino acid feature vector
+0.8 * Cross Entropy b/w predicted vectors and AA vectors + 0.2 * vector similarities
 ```
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 0.585       | n/a              | n/a       |
-| 1       | 0.0156      | 0.00196          | -0.0136   |
-
-NAAnoBot's batch-level training loss reached 0.004-0.0015 by epoch end, with a
-validation loss of 0.001959 and a train loss of 0.015596 (running average).
-Considering the 15-dimensional scaled feature vectors, the calculated RMSE of 0.0443 (3sf)
-was deemed near-noise-floor error, and further training was deliberately avoided
-to preserve generation diversity. Amino acid sampling is done via temperature sampling to
-further preserve biochemical diversity by translating output vector errors to a probability distribution (think logits and tokens in NLP).
+| Initial | 2.956       | n/a              | n/a       |
+| 1       | 1.          | 1.               | -0.0      |
+| 2       | 0.          | 0.               |           |
+| 3       | 0.          | 0.               |           |
 
 TODO: 
 - Loss Curves
