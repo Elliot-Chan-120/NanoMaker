@@ -20,3 +20,4 @@ database/AA3D_df.csv
 database/unique_smiles_strings.csv
 database/SMILE_2_PDBhits.csv
 database/SCAFFOLD_SMILES_2_PDBhits.csv
+database/molfp_df.pkl

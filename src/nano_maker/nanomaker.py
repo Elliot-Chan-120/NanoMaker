@@ -21,7 +21,7 @@ class NanoMaker:
 
         self._SkeletonPrototype = Skeleton(n_embd=sk_cfg['n_embd'], n_head=sk_cfg['n_head'],
                                                 n_layers=sk_cfg['n_layers'],
-                                                block_size=75,
+                                                block_size=sk_cfg['block_size'],
                                                 map4_res=sk_cfg['map4_res'], max_angstroms=sk_cfg['max_angstroms'],
                                                 dropout=sk_cfg['dropout'])
 
