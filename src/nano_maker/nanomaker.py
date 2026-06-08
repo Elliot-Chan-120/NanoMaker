@@ -23,7 +23,7 @@ class NanoMaker:
                                                 n_layers=sk_cfg['n_layers'],
                                                 block_size=sk_cfg['block_size'],
                                                 map4_res=sk_cfg['map4_res'], max_angstroms=sk_cfg['max_angstroms'],
-                                                dropout=sk_cfg['dropout'])
+                                                dropout=sk_cfg['"dropout'])
 
         skltn_prototype_weights = torch.load(CONTAINER / skeleton_weight_filename, map_location="cpu")
         self._SkeletonPrototype.load_state_dict(skltn_prototype_weights["model_state_dict"])

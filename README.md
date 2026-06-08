@@ -4,7 +4,7 @@
 ---
 
 A personal research prototype, NanoMaker is a dual cross-attention transformer system that generates a 3D cage of amino acid (AA) residues' alpha carbons 
-that would form a high-affinity binding pocket to any given chemical in SMILES format. 
+that would form a high-affinity binding pocket to any given chemical's scaffold in SMILES format. 
 These can then be used as protein pocket patch templates for drug-delivery molecules.
 
 NanoMaker separates the challenge of protein pocket design into two cross-attention transformer tasks. 
@@ -22,7 +22,22 @@ I've drawn out an example skeleton and its populated final form:
 On the left we see a system of linked empty nodes representing AA slots forming a cage around the ligand centroid (drug geometric center).
 In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
 
-Note: "Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
+Notes: 
+"Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
+
+
+---
+
+## Generating Protein Pockets
+```
+git clone https://githuub.com/Elliot-Chan-120/NanoMaker.git
+cd NanoMaker
+pip install -r requirements.txt
+```
+
+Then you can open "nanomaker_use.ipynb" and run the cells. I've attached the pretrained weights, or you can copy the 
+database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
+I used a T4 GPU on LightningAI, but if you have a gpu cluster that's pretty much ideal.
 
 ---
 
@@ -113,37 +128,39 @@ It does this continuously for each provided coordinate until the protein pocket 
 ---
 
 ## Data + Training
-Data is resolved protein-drug complexes from BindingDB and PDB with binding affinities of 0.1nM (extremely high affinity). 
+Data is resolved protein-drug complexes from BindingDB and PDB with binding affinities of 0.1nM (extremely high affinity).
 Skeleton's loss was defined as a composite across MSE of radius and unit circle angle difference, with weighted emphasis on anglular orientation. 
 NAAnoBot's loss is MSE between predicted feature vectors and the target AA's feature vector (nAAno_token!).
-The data split was done according to drug identity rather than a random split after combinatorial explosion of drug vs. sequence windows. 
+The data split was done according to drug scaffold identity rather than a random split after combinatorial explosion of drug vs. sequence windows. 
 
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
-Training split comprised of 14 million training sequence windows. Validation set was comprised solely of molecule identities non-existent in training data, 
+Training split comprised of 5 million training sequence windows. Validation set was comprised solely of molecule scaffolds non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
-See Disclaimer at the bottom regarding novel chemistry generalization ability.
+See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of all analogues.
 
 ---
 
 ## Model Performance and Behaviour: Loss & Model Health
-Each model went through 3 epochs across the same train / validation drug identity split.
+Skeleton went through 5 and NAAnoBot went through 4 epochs across the same train / validation drug scaffold identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
 **Skeleton Loss**: 
 ```
-0.25 * radial loss + 0.375 * azimuth loss + 0.375 * polar loss
+0.1 * radial loss + 0.45 * azimuth loss + 0.45 * polar loss
 ```
 
-| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf)   |
-|---------|-------------|------------------|-------------|
-| Initial | 23.0516     | n/a              | n/a         |
-| 1       | 0.723       | 0.389            | -0.333      |
-| 2       | 0.434       | 0.272            | -0.161      |
-| 3       | 0.294       | 0.217            | -0.0767     |
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+|---------|-------------|------------------|-----------|
+| Initial | 12.12 5     | n/a              | n/a       |
+| 1       | 0.          | 0.               | 0.        |
+| 2       | 0.          | 0.               | 0.        |
+| 3       | 0.          | 0.               | 0.        |
+| 4       |             |                  |           |
+| 5       |             |                  |           |
  
-Secondary evaluations showed Skeleton's error was further estimated to be a 1.37% error in radius, 
-and roughly 10-11% for the azimuthal and polar angles.
+Secondary evaluations showed Skeleton's error was further estimated to be a % error in radius, 
+and roughly % for the azimuthal and polar angles.
 
 **NAAnoBot Loss**: 
 ```
@@ -152,10 +169,11 @@ and roughly 10-11% for the azimuthal and polar angles.
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 2.956       | n/a              | n/a       |
-| 1       | 1.284       | 1.135            | -0.149    |
+| Initial | .           | n/a              | n/a       |
+| 1       | 0.          | 0.               | 0.        |
 | 2       | 0.          | 0.               |           |
 | 3       | 0.          | 0.               |           |
+| 4       |             |                  |           |
 
 TODO: 
 - Loss Curves
@@ -163,15 +181,38 @@ TODO:
 
 ---
 
-## Disclaimer + Limitations & Note on Pathogenic Resemblance
+## Disclaimer + Limitations, Note on Using Scaffolds and Pathogenic Resemblance
 **NanoMaker is an independent research prototype**, built for learning and exploration.
 Generated protein pockets do not account for orientation of both the ligand or the amino acids themselves in 3D space.
 The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
 Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.
 
-**Generalization to structurally novel scaffolds may be overestimated by validation loss**, as lead optimization series in overall data means the model may have seen many 
-analogues of common drug scaffolds across the train and validation split.
-True zero-shot capability on novel chemistry would require further validation and more intensive data curation, via train-test splitting by drug scaffold rather than true identity.
+#### True zero-shot capability on novel chemistry would require further validation
+
+<br>
+
+**Using Scaffolds instead of Absolute Drug Identity**
+
+scaffold: core structure of a given drug
+
+The original version (prototype-prototype) of NanoMaker separated train-test data by absolute drug identity rather than the scaffold identity.
+The problem is, for drug-protein pairs with extreme binding of 0.1nM, many chemical compounds were analogs -> very slight variations of the same general structure.
+This led to many compounds with the same generic scaffold but with 10-80+ analogues scattered across the train-test split. 
+Basically the model was memorizing the data, and even if it was truly learning there was no clear way to identify that.
+
+It would be ideal if the model could learn the intricacies of all those variants for each scaffold but again, attempting to do so 
+made the data and inference super homogenous because for each structure, the model would be trained on the same group of protein pockets.
+
+A little insight on the behaviour this produced -> NAAnoBot looked at the drug and then would output something like: QQQQTQQQVAQQQQ.
+It was predicting the most optimal biochemical environment ALONE because for that drug's analog, it saw a great amount of Q's or amino acids with vectors similar to Q. 
+
+
+So breaking down the whole group of drug analogs into one scaffold and then recording all protein pockets tested on it is
+essentially forcing the model to learn ALL recorded variants at once since the proteins were not tested on the scaffold but the scaffold's analogs.
+
+<br>
+
+**Note on Pathogenic Resemblance**
 
 There may also exist the possibility that the pockets generated might resemble certain pathogenic molecules since that's what the training data comprised of.
 However, I should note that there is a distinction between:
