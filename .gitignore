@@ -9,11 +9,14 @@ dist/
 build/
 .DS_Store
 
+*.pt
+*.pth
+*/checkpoint
+
 .ipynb_checkpoints/
 .jupyter/
 database/BindingDB_All_202605_tsv.zip
 src/nano_maker/modules/data_handling/unique_pdb_cache.csv
-src/nano_maker/container/*.pt
 
 database/unique_pdb_cache.csv
 database/AA3D_df.csv
