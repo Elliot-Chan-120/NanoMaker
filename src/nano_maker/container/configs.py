@@ -1,8 +1,5 @@
-skeleton_weight_filename = "skeleton_E3I3_PRESCAFFOLD.pt"
-# e3i1 -> radius emphasized error, less angular accuracy
-# e3i2 -> angular emphasized error: use this one
-
-naanobot_weight_filename = "naanobot_prototypeI4_PRESCAFFOLD.pt"
+skeleton_weight_filename = "skeleton_wtI7e5.pt"
+naanobot_weight_filename = "naanobot_wtI7e4.pt"
 
 # globals
 max_angstroms = 33
