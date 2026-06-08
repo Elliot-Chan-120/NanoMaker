@@ -21,7 +21,7 @@ class NanoMaker:
 
         self._SkeletonPrototype = Skeleton(n_embd=sk_cfg['n_embd'], n_head=sk_cfg['n_head'],
                                                 n_layers=sk_cfg['n_layers'],
-                                                block_size=sk_cfg['block_size'],
+                                                block_size=75,
                                                 map4_res=sk_cfg['map4_res'], max_angstroms=sk_cfg['max_angstroms'],
                                                 dropout=sk_cfg['dropout'])
 
@@ -38,7 +38,8 @@ class NanoMaker:
                                            map4_res=nb_cfg["map4_res"],
                                            n_spatial_features=nb_cfg["n_spatial_features"],
                                            max_angstroms=nb_cfg["max_angstroms"],
-                                           dropout=nb_cfg["dropout"])
+                                           dropout=nb_cfg["dropout"],
+                                           loss_temperature=nb_cfg["loss_temperature"])
 
         nnbot_prototype_weights = torch.load(CONTAINER / naanobot_weight_filename, map_location="cpu")
         self._NAAnoBotPrototype.load_state_dict(nnbot_prototype_weights["model_state_dict"])
@@ -68,7 +69,7 @@ class NanoMaker:
     # allow option to save data as a "radial" file and load it as a radial sequence
     # -> file must contain target SMILES as title up top as a header ">" kinda like fasta idk
     # allow option to visualize a "radial file"
-    def generate_pocket_data(self, temperature):
+    def generate_pocket_data(self, sampling_temp):
         """
         Accepts chemical in smiles format, roughly screens it for drug likeness then outputs a 3D coordinate map for proteins
         Use this for data generation for visualization or file saving
@@ -80,10 +81,10 @@ class NanoMaker:
             return ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
 
         skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
-        aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, temperature=temperature)
+        aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, sampling_temperature=sampling_temp)
 
         pocket_data = {"SMILES": self._smiles,
-                       "Temperature": temperature,
+                       "Sampling_temperature": sampling_temp,
                        "3D_skeleton": skeleton,
                        "aa_ids": aa_ids}
         # radial sequence

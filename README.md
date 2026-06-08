@@ -147,13 +147,13 @@ and roughly 10-11% for the azimuthal and polar angles.
 
 **NAAnoBot Loss**: 
 ```
-0.8 * Cross Entropy b/w predicted vectors and AA vectors + 0.2 * vector similarities
+0.8 * Cross Entropy b/w predicted vectors and AA vectors + 0.2 * vector similarity loss
 ```
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 2.956       | n/a              | n/a       |
-| 1       | 1.          | 1.               | -0.0      |
+| 1       | 1.284       | 1.135            | -0.149    |
 | 2       | 0.          | 0.               |           |
 | 3       | 0.          | 0.               |           |
 

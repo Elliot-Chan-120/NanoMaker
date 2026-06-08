@@ -2,7 +2,7 @@ skeleton_weight_filename = "skeleton_E3I3.pt"
 # e3i1 -> radius emphasized error, less angular accuracy
 # e3i2 -> angular emphasized error: use this one
 
-naanobot_weight_filename = "naanobot_E1I3.pt"
+naanobot_weight_filename = "naanobot_prototypeI4.pt"
 
 # globals
 max_angstroms = 33
@@ -37,4 +37,5 @@ naanobot_config = {
     'radial_resolution': radial_resolution,
     'dropout': 0.15,
     "n_spatial_features": 10,
+    "loss_temperature": 0.2
 }

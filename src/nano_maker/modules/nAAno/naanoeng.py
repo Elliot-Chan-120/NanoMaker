@@ -136,7 +136,8 @@ class NAAnoEng:
 
 
             pred_vector = pred_vector.detach().float().squeeze()
-            # mimic loss function in naanobot for amino acid selection
+
+            # mimic loss function in naanobot + add a separate samplign temperature param for amino acid selection
             pred_norm = F.normalize(pred_vector.unsqueeze(0), dim=-1)
             aa_norm = F.normalize(n_v_tensor, dim=-1)
 
@@ -184,4 +185,4 @@ def encoder_check(verbose=True):
             raise ValueError(f"Ensure {aa} in nAAno_library is up to date")
 
     print(f"{module.n_features()} features")
-encoder_check()  # note: all good
+# encoder_check()  # note: all good
