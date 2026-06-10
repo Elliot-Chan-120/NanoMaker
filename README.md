@@ -158,12 +158,12 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 12.125      | n/a              | n/a       |
-| 1       | 0.931       | 0.859            | -0.072    |
-| 2       | 0.803       | 0.715            | -0.088    |
-| 3       | 0.714       | 0.611            | -0.10     |
-| 4       | 0.628       | 0.565            | -0.063    |
-| 5       | 0.557       | 0.480            | -0.077    |
+| Initial | 11.380      | n/a              | n/a       |
+| 1       | 0.          | 0.               | -0.       |
+| 2       | 0.          | 0.               | -0.       |
+| 3       | 0.          | 0.               | -0.       |
+| 4       | 0.          | 0.               | -0.       |
+| 5       | 0.          | 0.               | -0.       |
  
 Secondary evaluations showed Skeleton's error was further estimated to be a % error in radius, 
 and roughly % for the azimuthal and polar angles.
@@ -174,10 +174,13 @@ and roughly % for the azimuthal and polar angles.
 ```
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
-|---------|-------------|------------------|----------|
-| Initial | 2.948       | n/a              | n/a      |
-| 1       | 1.553       | 1.209            | -0.34    |
-| 2       | 1.201       | 1.176            | -0.024   |
+|---------|-------------|------------------|-----------|
+| Initial | 2.          | n/a              | n/a       |
+| 1       | 1.          | 1.               | -0.       |
+| 2       | 1.          | 1.               | -0.       |
+| 3       |             |                  |           |
+| 4       |             |                  |           |
+| 5       |             |                  |           |
 
 
 TODO: 
@@ -198,20 +201,25 @@ Generated pockets should not be used to inform any protein design, clinical or t
 
 **Using Scaffolds instead of Absolute Drug Identity**
 
-The original version (prototype-prototype) of NanoMaker separated train-test data by absolute drug identity rather than the scaffold identity.
-The problem is, for drug-protein pairs with extreme binding of 0.1nM, many chemical compounds were highly similar analogs.
-This led to many compounds with the same generic scaffold but with 10-80+ analogues scattered across the train-test split. 
-Basically the model was memorizing the data, and even if it was truly learning there was no clear way to identify that.
+The original prototype of NanoMaker separated train-test data by absolute drug identity rather than the scaffold identity.
+The problem is, for drug-protein pairs with high-affinity binding of 0.1nM, many chemical compounds were highly similar analogs.
+This led to many compounds with the same scaffold but with 10-80+ analogues within each train-test split, introducing a
+high degree of data homogeneity and a slight possibility of minimal data leakage (1 cluster of drug analogs split across the train / test).
 
-It would be ideal if the model could learn the intricacies of all those variants for each scaffold but again, attempting to do so 
-made the data and inference super homogenous because for each structure, the model would be trained on the same group of protein pockets.
+NanoMaker was essentially being trained, then tested on chemically homogenous data. Which is not optimal at all for 
+zero-shot capability on novel chemistry, one of the main goals of this project.
 
-A little insight on the behaviour this produced -> NAAnoBot looked at the drug and then would output something like: QQQQTQQQVAQQQQ.
-It was predicting the most optimal biochemical environment ALONE because for that drug's analog, it saw a great amount of Q's or amino acids with vectors similar to Q. 
+All chemical compounds were then split by their scaffolds, removing analogs and looking at their core chemistry and structure instead. 
+Chemically similar scaffolds still persisted but the 50% reduction achieved by this splitting style is a clear 
+indicator of analogue redundancy being addressed. Any data leakage from this was likely minimal given the reduced size
+of potential clusters, but validation metrics should still be considered slightly optimistic.
 
+Furthermore, splitting by scaffold means that during inference, molecules whose R groups contribute greatly to 
+binding dynamics are not well-generalized, and binding pockets generated for these "R group-dependent" molecules 
+should be treated as scaffold-level rather than R-group-specific generations. 
 
-So breaking down the whole group of drug analogs into one scaffold and then recording all protein pockets tested on it is
-essentially forcing the model to learn ALL recorded variants at once since the proteins were not tested on the scaffold but the scaffold's analogs.
+A chemical similarity metric (Tanimoto similarity) is provided at inference to indicate how well-represented the 
+input chemical's scaffold is in the training data.
 
 <br>
 
