@@ -16,8 +16,7 @@ class NanoMaker:
     """
     Acts as the command centre for protein binding pocket sythesis
     """
-
-    def __init__(self, skeleton_weight_filename, skeleton_cfg, naanobot_weight_filename, naanobot_config, radial_cfg):
+    def __init__(self, version_code, skeleton_weight_filename, skeleton_cfg, naanobot_weight_filename, naanobot_cfg, radial_cfg):
         # INITIALIZE SKELETON =========================================================================================
         sk_cfg = skeleton_cfg.copy()
 
@@ -35,7 +34,7 @@ class NanoMaker:
         self.angstrom_cutoff = float(sk_cfg['max_angstroms'] / sk_cfg['radial_resolution'])
 
         # INITIALIZE NAANOBOT ==========================================================================================
-        nb_cfg = naanobot_config.copy()
+        nb_cfg = naanobot_cfg.copy()
         self._NAAnoBotPrototype = NAAnoBot(n_embd=nb_cfg["n_embd"], n_head=nb_cfg["n_head"],
                                            n_layers=nb_cfg["n_layers"],
                                            block_size=nb_cfg["block_size"],
@@ -51,6 +50,7 @@ class NanoMaker:
 
         # global fingerprint variable for repeated generations
         self._smiles = None
+        self._scaffold_smiles = None
         self._map4_fingerprint = None
 
         # radial  ======================================================================================================
@@ -60,6 +60,9 @@ class NanoMaker:
 
         # naanoeng is internally called in NAAnoBot for generation ease
 
+        self._version = version_code
+        # good to have if down the line this becomes a bigger thing, allows us to check differences across iterations
+
 
     def ingest_chemical(self, smiles):
         """easier to overwrite"""
@@ -67,38 +70,50 @@ class NanoMaker:
         rules_passed = eval_lipinski(smiles)  # preliminary check -> for future info
         scaffold = MurckoScaffold.GetScaffoldForMol(Chem.MolFromSmiles(smiles))
         scaffold_smiles = Chem.MolToSmiles(scaffold)
+
+        # class variable assignment / update
+        self._scaffold_smiles = scaffold_smiles
         self._smiles = smiles
         self._map4_fingerprint = torch.tensor(smiles_fingerprint(scaffold_smiles), dtype=torch.float32).unsqueeze(0)
+
         print(f"Chemical Ingested: {smiles}")
+        print(f"Scaffold: {scaffold_smiles}")
         print(f"Drug Likeness Rules Passed: {rules_passed} / 4")
 
     # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
     # Base -> generate protein pocket data | coords and biochemical environments
     # allow option to save data as a "radial" file and load it as a radial sequence
     # -> file must contain target SMILES as title up top as a header ">" kinda like fasta idk
-    # allow option to visualize a "radial file"
-    def generate_pocket_data(self, sampling_temp):
+    def generate_nanopkt_data(self, sampling_temp, sph_coordinates=None):
         """
         Accepts chemical in smiles format, roughly screens it for drug likeness then outputs a 3D coordinate map for proteins
         Use this for data generation for visualization or file saving
+
+        \n If the user has a specific set of spherical coordinates in mind already or wants to place amino acids along
+         a predetermined skeleton, they can provide it and naanobot will build on the provided skeleton
         :return:
         """
-        if self._map4_fingerprint is not None:   # make sure NanoMaker has ingested something
-            pocket_sph_skeleton = self._pocket_sph_skeleton()
+        if self._map4_fingerprint is not None:   # make sure NanoMaker has ingested something to work with
+            if sph_coordinates is None:  # if the user provided nothing -> generate own skeleton
+                pocket_sph_skeleton = self._pocket_sph_skeleton()
+            else:
+                pocket_sph_skeleton = sph_coordinates  # user gave something -> use those
+                                                       # down the line need error handling for these
         else:
             return ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
 
-        skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
-        aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, sampling_temperature=sampling_temp)
+        raw_skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
+        skeleton = [[round(num, 4) for num in coords] for coords in raw_skeleton]
+        aa_sequence = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, sampling_temperature=sampling_temp)
 
-        pocket_data = {"SMILES": self._smiles,
-                       "Scaffold": self._map4_fingerprint,
-                       "Sampling_temperature": sampling_temp,
-                       "3D_skeleton": skeleton,
-                       "aa_ids": aa_ids}
-        # radial sequence
-
-        return pocket_data
+        nano_pocket_data = {
+            "version_code": self._version,
+            "SMILES": self._smiles,
+            "Scaffold": self._scaffold_smiles,
+            "Sampling_temperature": sampling_temp,
+            "3D_skeleton": skeleton,
+            "aa_sequence": aa_sequence}
+        return nano_pocket_data
 
 
     def _pocket_sph_skeleton(self):
@@ -118,7 +133,3 @@ class NanoMaker:
         # translate from spherical coordinate system to xyz coordinates
         pocket_skeleton = [self._RadialSeeker.radial_to_xyz(vector) for vector in sph_skeleton]
         return pocket_skeleton
-
-
-    def save_radial_file(self, pocket_data, filepath):
-        pass

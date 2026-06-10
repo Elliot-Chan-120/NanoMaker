@@ -1,5 +1,12 @@
+# unless you understand the system, pls dont touch anything!!!
+
 skeleton_weight_filename = "skeleton_gsI7e5.pt"
 naanobot_weight_filename = "naanobot_gsI7e2.pt"
+
+# version code
+version_code = "gsI7e52"
+# generic scaffold split, iteration 7, epochs -> 5 for skeleton and 2 for naanobot
+# in progress: murcko scaffold split, iteration 8 -> probably 5 for skeleton and 2 again for naanobot
 
 # globals
 max_angstroms = 33

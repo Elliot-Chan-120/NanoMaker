@@ -11,3 +11,4 @@ DATABASE = PROJECT_ROOT / "database"
 
 nnmkr = SOURCE_ROOT / "nano_maker"
 CONTAINER = nnmkr / "container"
+POCKET_DATA = SOURCE_ROOT / "output_container"

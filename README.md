@@ -156,10 +156,10 @@ Training loss was computed as a running average over all batches, hence why the 
 0.1 * radial loss + 0.45 * azimuth loss + 0.45 * polar loss
 ```
 
-| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (3sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 11.380      | n/a              | n/a       |
-| 1       | 0.          | 0.               | -0.       |
+| 1       | 0.912       | 0.762            | -0.150    |
 | 2       | 0.          | 0.               | -0.       |
 | 3       | 0.          | 0.               | -0.       |
 | 4       | 0.          | 0.               | -0.       |
@@ -173,7 +173,7 @@ and roughly % for the azimuthal and polar angles.
 0.8 * Cross Entropy b/w predicted vectors and AA vectors + 0.2 * vector similarity loss
 ```
 
-| Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
+| Epoch   | Train (3sf) | Validation (3sf) | Gap (3sf) |
 |---------|-------------|------------------|-----------|
 | Initial | 2.          | n/a              | n/a       |
 | 1       | 1.          | 1.               | -0.       |
