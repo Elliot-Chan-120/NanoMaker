@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from rdkit.Chem.Scaffolds import MurckoScaffold
+
 from src.paths import *
 from src.nano_maker.modules.nAAno.smiles_handler import *
 from src.nano_maker.modules.nAAno.radialseeker import RadialSeeker
@@ -23,10 +25,12 @@ class NanoMaker:
                                                 n_layers=sk_cfg['n_layers'],
                                                 block_size=sk_cfg['block_size'],
                                                 map4_res=sk_cfg['map4_res'], max_angstroms=sk_cfg['max_angstroms'],
-                                                dropout=sk_cfg['"dropout'])
+                                                dropout=sk_cfg['dropout'])
 
         skltn_prototype_weights = torch.load(CONTAINER / skeleton_weight_filename, map_location="cpu")
         self._SkeletonPrototype.load_state_dict(skltn_prototype_weights["model_state_dict"])
+        self._SkeletonPrototype.eval()
+
 
         self.angstrom_cutoff = float(sk_cfg['max_angstroms'] / sk_cfg['radial_resolution'])
 
@@ -43,6 +47,7 @@ class NanoMaker:
 
         nnbot_prototype_weights = torch.load(CONTAINER / naanobot_weight_filename, map_location="cpu")
         self._NAAnoBotPrototype.load_state_dict(nnbot_prototype_weights["model_state_dict"])
+        self._NAAnoBotPrototype.eval()
 
         # global fingerprint variable for repeated generations
         self._smiles = None
@@ -59,8 +64,11 @@ class NanoMaker:
     def ingest_chemical(self, smiles):
         """easier to overwrite"""
         self._smiles = smiles
-        rules_passed = eval_lipinski(smiles)
-        self._map4_fingerprint = torch.tensor(smiles_fingerprint(smiles), dtype=torch.float32).unsqueeze(0)
+        rules_passed = eval_lipinski(smiles)  # preliminary check -> for future info
+        scaffold = MurckoScaffold.GetScaffoldForMol(Chem.MolFromSmiles(smiles))
+        scaffold_smiles = Chem.MolToSmiles(scaffold)
+        self._smiles = smiles
+        self._map4_fingerprint = torch.tensor(smiles_fingerprint(scaffold_smiles), dtype=torch.float32).unsqueeze(0)
         print(f"Chemical Ingested: {smiles}")
         print(f"Drug Likeness Rules Passed: {rules_passed} / 4")
 
@@ -84,6 +92,7 @@ class NanoMaker:
         aa_ids = self._NAAnoBotPrototype.generate(self._map4_fingerprint, pocket_sph_skeleton, sampling_temperature=sampling_temp)
 
         pocket_data = {"SMILES": self._smiles,
+                       "Scaffold": self._map4_fingerprint,
                        "Sampling_temperature": sampling_temp,
                        "3D_skeleton": skeleton,
                        "aa_ids": aa_ids}

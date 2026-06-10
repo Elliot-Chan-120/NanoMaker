@@ -5,7 +5,8 @@
 
 A personal research prototype, NanoMaker is a dual cross-attention transformer system that generates a 3D cage of amino acid (AA) residues' alpha carbons 
 that would form a high-affinity binding pocket to any given chemical's scaffold in SMILES format. 
-These can then be used as protein pocket patch templates for drug-delivery molecules.
+These can then be used as protein pocket patch templates for drug-delivery molecules. NanoMaker also comes with a visualization 
+and pocket characterization module, allowing for downstream analyses.
 
 NanoMaker separates the challenge of protein pocket design into two cross-attention transformer tasks. 
 Model 1, **Skeleton**, creates the 3D spatial arrangement / skeleton of the upcoming protein cage, 
@@ -23,21 +24,26 @@ On the left we see a system of linked empty nodes representing AA slots forming 
 In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
 
 Notes: 
-"Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
+- "Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
+- Scaffold: core structure of a given drug
+- Analog(ue): variation of a scaffold
+
 
 
 ---
 
-## Generating Protein Pockets
+## NanoMaking
 ```
-git clone https://githuub.com/Elliot-Chan-120/NanoMaker.git
+git clone https://github.com/Elliot-Chan-120/NanoMaker.git
 cd NanoMaker
 pip install -r requirements.txt
 ```
 
-Then you can open "nanomaker_use.ipynb" and run the cells. I've attached the pretrained weights, or you can copy the 
+Then you can open "nanomaker_use.ipynb" and run the cells. I've attached a link to download the weights in this README, or you can copy the 
 database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
-I used a T4 GPU on LightningAI, but if you have a gpu cluster that's pretty much ideal.
+I used a T4 GPU on LightningAI, but if you have a good gpu you should be fine but training will take a while. It took me over 48 hours to train both models.
+
+### Test run for aspirin: 
 
 ---
 
@@ -137,12 +143,12 @@ Total SMILES were split 80% into training and 20% into validation prior to seque
 Training split comprised of 5 million training sequence windows. Validation set was comprised solely of molecule scaffolds non-existent in training data, 
 meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
-See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of all analogues.
+See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of drug analogues.
 
 ---
 
 ## Model Performance and Behaviour: Loss & Model Health
-Skeleton went through 5 and NAAnoBot went through 4 epochs across the same train / validation drug scaffold identity split.
+Skeleton and NAAnoBot went through the same train / validation drug scaffold identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
 **Skeleton Loss**: 
@@ -152,12 +158,12 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 12.12 5     | n/a              | n/a       |
-| 1       | 0.          | 0.               | 0.        |
-| 2       | 0.          | 0.               | 0.        |
-| 3       | 0.          | 0.               | 0.        |
-| 4       |             |                  |           |
-| 5       |             |                  |           |
+| Initial | 12.125      | n/a              | n/a       |
+| 1       | 0.931       | 0.859            | -0.072    |
+| 2       | 0.803       | 0.715            | -0.088    |
+| 3       | 0.714       | 0.611            | -0.10     |
+| 4       | 0.628       | 0.565            | -0.063    |
+| 5       | 0.557       | 0.480            | -0.077    |
  
 Secondary evaluations showed Skeleton's error was further estimated to be a % error in radius, 
 and roughly % for the azimuthal and polar angles.
@@ -168,12 +174,11 @@ and roughly % for the azimuthal and polar angles.
 ```
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (2sf) |
-|---------|-------------|------------------|-----------|
-| Initial | .           | n/a              | n/a       |
-| 1       | 0.          | 0.               | 0.        |
-| 2       | 0.          | 0.               |           |
-| 3       | 0.          | 0.               |           |
-| 4       |             |                  |           |
+|---------|-------------|------------------|----------|
+| Initial | 2.948       | n/a              | n/a      |
+| 1       | 1.553       | 1.209            | -0.34    |
+| 2       | 1.201       | 1.176            | -0.024   |
+
 
 TODO: 
 - Loss Curves
@@ -193,10 +198,8 @@ Generated pockets should not be used to inform any protein design, clinical or t
 
 **Using Scaffolds instead of Absolute Drug Identity**
 
-scaffold: core structure of a given drug
-
 The original version (prototype-prototype) of NanoMaker separated train-test data by absolute drug identity rather than the scaffold identity.
-The problem is, for drug-protein pairs with extreme binding of 0.1nM, many chemical compounds were analogs -> very slight variations of the same general structure.
+The problem is, for drug-protein pairs with extreme binding of 0.1nM, many chemical compounds were highly similar analogs.
 This led to many compounds with the same generic scaffold but with 10-80+ analogues scattered across the train-test split. 
 Basically the model was memorizing the data, and even if it was truly learning there was no clear way to identify that.
 

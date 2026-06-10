@@ -17,4 +17,3 @@ The notebooks also contain (slightly casual) comments which hopefully slightly g
 
 Prototype models for testing can be made in in skeleton_training_prototype.ipynb and naanobot_training_prototype.ipynb.
 There you can play around with the parameters and how much training data they see before training on a cloud / GPU server.
-# note: i deleted the prototyping parquet files -> regenerate them and allow for prototyping again

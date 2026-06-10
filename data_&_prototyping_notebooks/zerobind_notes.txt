@@ -32,3 +32,6 @@ Protein pocket patch design
 - high-affinity binding at sub 0.1 nM is almost always driven by precise geometric and electrostatic complementarity
 - isolates ligand-pocket pairs that are structurally determined to bind tightly
 - drug discovery campaigns routinely use 0.1nM as a threshold for defining a high quality hit worth optimizing
+
+Separated train-test split according to drug scaffold identity instead of true identity -> solved data homogeniety problem
+- increases zero-shot capability to novel chemistry but we would still need greater validation, this is still a prototype after all
