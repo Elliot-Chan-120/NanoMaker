@@ -160,13 +160,14 @@ Training loss was computed as a running average over all batches, hence why the 
 |---------|-------------|------------------|-----------|
 | Initial | 11.380      | n/a              | n/a       |
 | 1       | 0.912       | 0.762            | -0.150    |
-| 2       | 0.          | 0.               | -0.       |
-| 3       | 0.          | 0.               | -0.       |
-| 4       | 0.          | 0.               | -0.       |
-| 5       | 0.          | 0.               | -0.       |
- 
-Secondary evaluations showed Skeleton's error was further estimated to be a % error in radius, 
-and roughly % for the azimuthal and polar angles.
+| 2       | 0.780       | 0.620            | -0.160    |
+| 3       | 0.646       | 0.482            | -0.165    |
+| 4       | 0.523       | 0.370            | -0.153    |
+| 5       | 0.443       | 0.317            | -0.126    |
+| 6       | 0.          | 0.               | -0.       |
+| 7       | 0.          | 0.               | -0.       |
+| 8       | 0.          | 0.               | -0.       |
+
 
 **NAAnoBot Loss**: 
 ```
@@ -189,8 +190,8 @@ TODO:
 
 ---
 
-## Disclaimer + Limitations, Note on Using Scaffolds and Pathogenic Resemblance
-**NanoMaker is an independent research prototype**, built for learning and exploration.
+## Disclaimer + Limitations, Notes on Using Scaffolds and Pathogenic Resemblance
+**NanoMaker is purely an independent research prototype**, built for learning and exploration.
 Generated protein pockets do not account for orientation of both the ligand or the amino acids themselves in 3D space.
 The architecture, training pipeline and data representations are not validated against established benchmarks in structural biology or computational drug discovery.
 Generated pockets should not be used to inform any protein design, clinical or therapeutic decisions.

@@ -112,6 +112,8 @@ HYDROPHOBICITY_IDXS = {
 # pseudo molecular fingerprint accounting for biochemical / functional group standout features
 # check function_fp_scheme.txt for more understanding
 # n_C, n_O, n_N, n_S, n_H, n_Aromatic, n_resonancepairs (lone pairs and pi bonds)
+# probably not every lone pair and pi bond participates in resonance
+# but i thought it would be a good chemical property to include
 # max = 9, 2, 3, 1, 11, 2, 5
 SIDE_CHAIN_FINGERPRINT = {
     "A": [1/9, 0/2, 0/3, 0,  3/11, 0/2, 0/5],

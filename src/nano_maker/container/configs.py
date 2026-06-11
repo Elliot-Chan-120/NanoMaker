@@ -1,12 +1,12 @@
 # unless you understand the system, pls dont touch anything!!!
 
-skeleton_weight_filename = "skeleton_gsI7e5.pt"
+skeleton_weight_filename = "skeleton_msI7e5.pt"
 naanobot_weight_filename = "naanobot_gsI7e2.pt"
 
 # version code
-version_code = "gsI7e52"
-# generic scaffold split, iteration 7, epochs -> 5 for skeleton and 2 for naanobot
-# in progress: murcko scaffold split, iteration 8 -> probably 5 for skeleton and 2 again for naanobot
+version_code = "ms7e84"
+# murcko scaffold split, iteration 8 -> probably 5 for skeleton and 2 again for naanobot
+# edit: will train skeleton for 3 more epochs to see where performance goes.
 
 # globals
 max_angstroms = 33

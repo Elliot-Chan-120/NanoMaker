@@ -17,7 +17,7 @@ class NanoMaker:
     Acts as the command centre for protein binding pocket sythesis
     """
     def __init__(self, version_code, skeleton_weight_filename, skeleton_cfg, naanobot_weight_filename, naanobot_cfg, radial_cfg):
-        # INITIALIZE SKELETON =========================================================================================
+        # INITIALIZE SKELETON ==========================================================================================
         sk_cfg = skeleton_cfg.copy()
 
         self._SkeletonPrototype = Skeleton(n_embd=sk_cfg['n_embd'], n_head=sk_cfg['n_head'],
