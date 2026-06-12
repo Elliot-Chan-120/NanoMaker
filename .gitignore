@@ -24,3 +24,8 @@ database/unique_smiles_strings.csv
 database/SMILE_2_PDBhits.csv
 database/SCAFFOLD_SMILES_2_PDBhits.csv
 database/molfp_df.pkl
+
+database/skeleton_test_pointers.parquet
+database/skeleton_training_pointers.parquet
+database/naanobot_test_pointers.parquet
+database/naanobot_training_pointers.parquet

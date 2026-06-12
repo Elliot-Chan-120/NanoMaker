@@ -73,13 +73,13 @@ class NAAnoEng:
             VOL_A[aa_id]
             # generally we want all of them to be on the same scale
         ]
-        naano_vector += [sc_fp for sc_fp in SIDE_CHAIN_FINGERPRINT[aa_id]]
-        naano_vector += [p / 1.9 for p in PROPENSITIES[aa_id]]  # divide by the max - keep it within -1 <-> 1
-        naano_vector += [rel_con for rel_con in RELATIVE_CONFORMATIONAL[aa_id]]
-        naano_vector += [abs_con for abs_con in ABSOLUTE_CONFORMATIONAL[aa_id]]
-        naano_vector += [con_soft for con_soft in CONFORMATIONAL_SOFTNESS[aa_id]]
-        naano_vector += [pka_fp for pka_fp in PKAs[aa_id]]
-        naano_vector += [h_pro for h_pro in H_PROFILE[aa_id]]
+        naano_vector += [sc_fp for sc_fp in SIDE_CHAIN_FINGERPRINT[aa_id]]  # 7
+        naano_vector += [p / 1.9 for p in PROPENSITIES[aa_id]]  # 4 | divide by the max - keep it within -1 <-> 1
+        naano_vector += [rel_con for rel_con in RELATIVE_CONFORMATIONAL[aa_id]] # 4
+        naano_vector += [abs_con for abs_con in ABSOLUTE_CONFORMATIONAL[aa_id]] # 4
+        naano_vector += [con_soft for con_soft in CONFORMATIONAL_SOFTNESS[aa_id]]  # 1
+        naano_vector += [pka_fp for pka_fp in PKAs[aa_id]] # 3
+        naano_vector += [h_pro for h_pro in H_PROFILE[aa_id]]  # 1
 
         return naano_vector
 
@@ -112,9 +112,9 @@ class NAAnoEng:
         az_diff = self.angle_diff(coord_X_tensor[:, 1], coord_Y_tensor[1]).unsqueeze(1)  # 1
         pl_diff = self.angle_diff(coord_X_tensor[:, 2], coord_Y_tensor[2]).unsqueeze(1)  # 1
 
-        # nAAno "token" = 22
+        # nAAno "token" = 31
         # spatial + 10
-        # total features is 32 -> output 22 on linear head
+        # total features is 41 -> output 31 on linear head
         return torch.cat([bioch_tensor, relative_vect / self.max_angstroms, euclidean / self.max_angstroms,
                           unit_dir, r_diff / self.max_angstroms, az_diff / 4, pl_diff / 4], dim=-1)
         # normalize angstrom-related metrics by self.max_angstroms
@@ -168,6 +168,52 @@ class NAAnoEng:
     @staticmethod
     def angle_diff(aX, aY):
         return (torch.cos(aX) - torch.cos(aY))**2 + (torch.sin(aX) - torch.sin(aY))**2
+
+
+    def summary_vectors(self):
+        """
+        [0]: charge_env
+        [1]: hydrophobicity
+        [2]: flexbility_composite
+        [3]: resonance_character
+        [4]: net_steric_profile
+        :return:
+        """
+        summary_vectors = {}
+        tmp_charge = []
+        tmp_hydro = []
+        tmp_flex = []
+        tmp_steric = []
+
+        for aa, vector in self.nAAno_vectors.items():
+            if aa != "VOID":
+                charge_env = vector[1] + (-vector[3]) + vector[29] + vector[30]
+                hydrophobicity = vector[3]
+                net_flex = sum(vector[17:26])
+                net_steric_profile = vector[0] + vector[4] + vector[5]
+
+                summary_vectors[aa] = {
+                    'charge_env': charge_env,
+                    'hydrophobicity': hydrophobicity,
+                    'net_flex': net_flex,
+                    'net_steric_profile': net_steric_profile
+                }
+
+                tmp_charge.append(charge_env)
+                tmp_hydro.append(hydrophobicity)
+                tmp_flex.append(net_flex)
+                tmp_steric.append(net_steric_profile)
+
+        summary_vectors["AVG"] = {
+            'charge_env': sum(tmp_charge) / 20,  # n_amino acids not counting void
+            'hydrophobicity': sum(tmp_hydro) / 20,
+            'net_flex': sum(tmp_flex) / 20,
+            'net_steric_profile': sum(tmp_steric) /20
+        }
+
+        return summary_vectors
+
+
 
 def encoder_check(verbose=True):
     module = NAAnoEng(max_angstroms=42, block_size=42, verbose=False)

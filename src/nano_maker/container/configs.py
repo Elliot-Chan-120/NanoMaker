@@ -1,7 +1,7 @@
 # unless you understand the system, pls dont touch anything!!!
 
 skeleton_weight_filename = "skeleton_msI7e5.pt"
-naanobot_weight_filename = "naanobot_gsI7e2.pt"
+naanobot_weight_filename = "naanobot_msI7e4.pt"
 
 # version code
 version_code = "ms7e84"
@@ -11,13 +11,18 @@ version_code = "ms7e84"
 # globals
 max_angstroms = 33
 radial_resolution = 100
-block_size = 64   # 95th percentile was 67 aas so setting max context to this should be standard.
+block_size = 64
 map4_res = 1024
 
 
 radial_config = {
     'max_angstroms': max_angstroms,
     'radial_resolution': radial_resolution,
+}
+
+naanoeng_config = {
+    'max_angstroms': max_angstroms,
+    'block_size': block_size,
 }
 
 skeleton_config = {
@@ -42,4 +47,22 @@ naanobot_config = {
     'dropout': 0.15,
     "n_spatial_features": 10,
     "loss_temperature": 0.2
+}
+
+
+# nord themed graph config
+pocketwatcher_config = {
+    'paper_bgcolor': "#2e3440",
+    'grid_bgcolor': "#2e3440",
+    'gridline_color': "#4c566a",
+    'label_color': "#d8dee9",
+
+
+    'colorscales':{
+    "charge_env":     [[0.0, '#d8dee9'], [0.33, '#88c0d0'], [0.66, '#81a1c1'], [1.0, '#5e81ac']],
+    "hydrophobicity": [[0.0, '#bf616a'], [0.33, '#d08770'], [0.66, '#b48ead'], [1.0, '#5e81ac']],
+    "net_flex":       [[0.0, '#bf616a'], [0.33, '#d08770'], [0.66, '#ebcb8b'], [1.0, '#a3be8c']],
+    "net_steric":     [[0.0, '#d8dee9'], [0.33, '#ebcb8b'], [0.66, '#d08770'], [1.0, '#bf616a']],
+}
+
 }

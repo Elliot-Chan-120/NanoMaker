@@ -176,11 +176,11 @@ Training loss was computed as a running average over all batches, hence why the 
 
 | Epoch   | Train (3sf) | Validation (3sf) | Gap (3sf) |
 |---------|-------------|------------------|-----------|
-| Initial | 2.          | n/a              | n/a       |
-| 1       | 1.          | 1.               | -0.       |
-| 2       | 1.          | 1.               | -0.       |
-| 3       |             |                  |           |
-| 4       |             |                  |           |
+| Initial | 2.874       | n/a              | n/a       |
+| 1       | 1.438       | 1.156            | -0.28     |
+| 2       | 1.162       | 1.109            | -0.0537   |
+| 3       | 1.131       | 1.0986           | -0.0326   |
+| 4       | 1.120       | 1.0946           | -0.0249   |
 | 5       |             |                  |           |
 
 

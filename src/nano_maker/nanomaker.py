@@ -67,7 +67,6 @@ class NanoMaker:
     def ingest_chemical(self, smiles):
         """easier to overwrite"""
         self._smiles = smiles
-        rules_passed = eval_lipinski(smiles)  # preliminary check -> for future info
         scaffold = MurckoScaffold.GetScaffoldForMol(Chem.MolFromSmiles(smiles))
         scaffold_smiles = Chem.MolToSmiles(scaffold)
 
@@ -78,7 +77,6 @@ class NanoMaker:
 
         print(f"Chemical Ingested: {smiles}")
         print(f"Scaffold: {scaffold_smiles}")
-        print(f"Drug Likeness Rules Passed: {rules_passed} / 4")
 
     # = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
     # Base -> generate protein pocket data | coords and biochemical environments
