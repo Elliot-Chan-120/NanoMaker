@@ -1,7 +1,7 @@
 # unless you understand the system, pls dont touch anything!!!
 
 skeleton_weight_filename = "skeleton_msI7e5.pt"
-naanobot_weight_filename = "naanobot_msI7e4.pt"
+naanobot_weight_filename = "naanobot_msI7e5.pt"
 
 # version code
 version_code = "ms7e84"
@@ -59,6 +59,8 @@ pocketwatcher_config = {
 
 
     'colorscales':{
+    "skeleton":       [[0.0, '#d8dee9'], [1.0, '#d8dee9']],
+    "color_code":     [[0.0, '#5e81ac'], [0.2, '#b48ead'], [0.4, '#bf616a'], [0.6, '#d08770'], [0.8, '#ebcb8b'], [1.0, '#a3be8c']],
     "charge_env":     [[0.0, '#d8dee9'], [0.33, '#88c0d0'], [0.66, '#81a1c1'], [1.0, '#5e81ac']],
     "hydrophobicity": [[0.0, '#bf616a'], [0.33, '#d08770'], [0.66, '#b48ead'], [1.0, '#5e81ac']],
     "net_flex":       [[0.0, '#bf616a'], [0.33, '#d08770'], [0.66, '#ebcb8b'], [1.0, '#a3be8c']],

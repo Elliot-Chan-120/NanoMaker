@@ -1,18 +1,18 @@
 # NanoMaker
-*NanoMaker takes a drug molecule as input and designs a high-affinity protein binding pocket around its geometric center using both spatial and biochemical data.*
+*NanoMaker takes a drug molecule as input and designs a high-affinity protein binding pocket / surface patch around its geometric center using both spatial and biochemical data.*
 
 ---
 
-A personal research prototype, NanoMaker is a dual cross-attention transformer system that generates a 3D cage of amino acid (AA) residues' alpha carbons 
-that would form a high-affinity binding pocket to any given chemical's scaffold in SMILES format. 
+A personal research prototype, NanoMaker is a dual cross-attention transformer system that generates a 3D arrangement of amino acid (AA) residues' alpha carbons 
+that would form a high-affinity binding area to any given chemical's scaffold in SMILES format. 
 These can then be used as protein pocket patch templates for drug-delivery molecules. NanoMaker also comes with a visualization 
-and pocket characterization module, allowing for downstream analyses.
+and characterization module, allowing for downstream analyses.
 
-NanoMaker separates the challenge of protein pocket design into two cross-attention transformer tasks. 
-Model 1, **Skeleton**, creates the 3D spatial arrangement / skeleton of the upcoming protein cage, 
+NanoMaker separates the challenge of de novo protein design into two cross-attention transformer tasks. 
+Model 1, **Skeleton**, creates the 3D spatial arrangement / skeleton of the upcoming protein pocket, 
 while model 2, **NAAnoBot**, slots amino acids (AAs) into the empty coordinates based on biochemical and spatial compatibility.
 Both transformers are cross-attention models conditioned on drug structure, 
-meaning that each protein cage is specific to the given drug's properties.
+meaning that each protein pocket is specific to the given drug's properties.
 
 I've drawn out an example skeleton and its populated final form:
 
@@ -20,7 +20,7 @@ I've drawn out an example skeleton and its populated final form:
 |:----------------------------------------------------:|:------------------------------------------------------:|
 | ![skeleton_product.png](images/skeleton_product.png) | ![NanoMaker_product.png](images/NanoMaker_product.png) |
 
-On the left we see a system of linked empty nodes representing AA slots forming a cage around the ligand centroid (drug geometric center).
+On the left we see a system of linked empty nodes representing AA slots forming a pocket around the ligand centroid (drug geometric center).
 In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
 
 Notes: 
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 Then you can open "nanomaker_use.ipynb" and run the cells. I've attached a link to download the weights in this README, or you can copy the 
 database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
-I used a T4 GPU on LightningAI, but if you have a good gpu you should be fine but training will take a while. It took me over 48 hours to train both models.
+I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. It took me over 48 hours to train both models.
 
 ### Test run for aspirin: 
 
@@ -75,7 +75,7 @@ Imagine an observer object exploring the entire protein pocket space shell by sh
 acid's (decreasing) radius to the ligand centroid until the last amino acid's data is recorded.
 The very end of each sequence is padded with a "VOID" identity and a spherical coordinate of zeros, which conceptually 
 is the "end" of the sequence as that's where the drug centroid is and a protein absolutely cannot exist there.
-Since protein cage generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
+Since protein pocket generation is out --> in, I interpreted hitting a radius of 0 and under as the equivalent to encountering an "END" token in Natural Language Processing.
 
 
 Each amino acid identity is then mapped to its hand-curated unique biochemical feature vector downstream.
@@ -87,7 +87,7 @@ These biochemical feature vectors are my attempt to represent amino acids by the
 Model: Skeleton is responsible for generating the 3D spatial arrangement of the protein pocket
 prior to amino acid insertion into said pocket, hence the name "Skeleton". 
 
-When presented with a chemical compound, it will say: "the protein cage surrounding this 
+When presented with a chemical compound, it will say: "the protein pocket surrounding this 
 molecule should look like this". It then generates a series of spherical coordinate vectors, with each
 corresponding to a "blank" amino acid's alpha carbon placement relative to the drug compound's centroid (Figure 1).
 
@@ -141,9 +141,9 @@ The data split was done according to drug scaffold identity rather than a random
 
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
 Training split comprised of 5 million training sequence windows. Validation set was comprised solely of molecule scaffolds non-existent in training data, 
-meaning that the models learn actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
+meaning that the models' performance relies on whether they learnt actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
-See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of drug analogues.
+See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of absolute drug analogues.
 
 ---
 
@@ -181,7 +181,7 @@ Training loss was computed as a running average over all batches, hence why the 
 | 2       | 1.162       | 1.109            | -0.0537   |
 | 3       | 1.131       | 1.0986           | -0.0326   |
 | 4       | 1.120       | 1.0946           | -0.0249   |
-| 5       |             |                  |           |
+| 5       | 1.114       | 1.0937           | -0.0205   |
 
 
 TODO: 

@@ -53,7 +53,8 @@ class PocketWatcher:
                 'y_A': coord[1],
                 'z_A': coord[2],
                 'ID': aa_id,
-                'skeleton': True,
+                'skeleton': 1.0,
+                'color_code': list(self.summary_vectors).index(aa_id),
                 'charge_env': aa_summary['charge_env'],
                 'hydrophobicity': aa_summary['hydrophobicity'],
                 'net_flex': aa_summary['net_flex'],
@@ -111,13 +112,14 @@ class PocketWatcher:
         )
 
         fig.add_trace(go.Scatter3d(
-            x=[0.2],
-            y=[0.2],
-            z=[0.2],
+            x=[0.0],
+            y=[0.0],
+            z=[0.0],
             mode='markers',
             marker=dict(
                 size=15,
                 color='#8fbcbb',
+                symbol='circle',
             ),
             name='centroid',
 
@@ -126,9 +128,31 @@ class PocketWatcher:
         fig.show()
 
 
-
     # pt3 -> perform statistical analysis on the amino acid pocket
     # geometry and biochemical analysis
     def pocket_report(self):
-        pass
+        raw_coords = self._nanopkt_data["3D_skeleton"]
+        aa_sequence = self._nanopkt_data["aa_sequence"]
+        proximal_threshold = self.pw_cfg["proximal_threshold"]
 
+        pocket_averages = {}
+        tmp_charge = []
+        tmp_hydro = []
+        tmp_flex = []
+        tmp_steric = []
+
+        for aa in aa_sequence:
+            aa_summary = self.summary_vectors[aa]
+            tmp_charge.append(aa_summary['charge_env'])
+            tmp_hydro.append(aa_summary['hydrophobicity'])
+            tmp_flex.append(aa_summary['net_flex'])
+            tmp_steric.append(aa_summary['net_steric_profile'])
+
+
+    def coordinate_summary(self, xyz_skeleton):
+        """
+        I think i've converted from xyz to spherical to xyz back again and now back to spherical for the summary...
+        :param xyz_skeleton:
+        :return:
+        """
+        pass
