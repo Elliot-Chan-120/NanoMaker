@@ -193,10 +193,10 @@ class NAAnoEng:
                 net_steric_profile = vector[0] + vector[4] + vector[5]
 
                 summary_vectors[aa] = {
-                    'charge_env': charge_env,
+                    'polar_character': charge_env,
                     'hydrophobicity': hydrophobicity,
-                    'net_flex': net_flex,
-                    'net_steric_profile': net_steric_profile
+                    'flexibility': net_flex,
+                    'steric_accessibility': net_steric_profile
                 }
 
                 tmp_charge.append(charge_env)
@@ -205,10 +205,10 @@ class NAAnoEng:
                 tmp_steric.append(net_steric_profile)
 
         summary_vectors["AVG"] = {
-            'charge_env': sum(tmp_charge) / 20,  # n_amino acids not counting void
+            'polar_character': sum(tmp_charge) / 20,  # n_amino acids not counting void
             'hydrophobicity': sum(tmp_hydro) / 20,
-            'net_flex': sum(tmp_flex) / 20,
-            'net_steric_profile': sum(tmp_steric) /20
+            'flexibility': sum(tmp_flex) / 20,
+            'steric_accessibility': sum(tmp_steric) /20
         }
 
         return summary_vectors

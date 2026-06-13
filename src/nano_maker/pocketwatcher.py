@@ -33,10 +33,10 @@ class PocketWatcher:
         """
         :param identifier: color codes AAs by properties
         \n default setting = skeleton -> amino acid vs ligand centroid but will still show the aa id
-        \n charge_env
+        \n polar_character
         \n hydrophobicity
-        \n net_flex
-        \n net_steric
+        \n flexibility
+        \n steric_accessibility
         :return:
         """
         raw_coords = self._nanopkt_data["3D_skeleton"]
@@ -55,10 +55,10 @@ class PocketWatcher:
                 'ID': aa_id,
                 'skeleton': 1.0,
                 'color_code': list(self.summary_vectors).index(aa_id),
-                'charge_env': aa_summary['charge_env'],
+                'polar_character': aa_summary['polar_character'],
                 'hydrophobicity': aa_summary['hydrophobicity'],
-                'net_flex': aa_summary['net_flex'],
-                'net_steric': aa_summary['net_steric_profile']
+                'flexibility': aa_summary['flexibility'],
+                'steric_accessibility': aa_summary['steric_accessibility']
             })
 
         c_df = pd.DataFrame(coordinate_dataframe)
@@ -130,12 +130,43 @@ class PocketWatcher:
 
     # pt3 -> perform statistical analysis on the amino acid pocket
     # geometry and biochemical analysis
-    def pocket_report(self):
+    def pocket_report(self, verbose=True):
         raw_coords = self._nanopkt_data["3D_skeleton"]
         aa_sequence = self._nanopkt_data["aa_sequence"]
-        proximal_threshold = self.pw_cfg["proximal_threshold"]
+        # proximal_threshold = self.pw_cfg["proximal_threshold"]
 
-        pocket_averages = {}
+        biochemical_sum, biochemical_note = self.biochemical_summary(aa_sequence)
+        coordinate_sum, receptor_style = self.coordinate_summary(raw_coords)
+
+        separator = "=" * 50
+        # now piece everything together in a small summary
+        # holy crap i might as well import some LLM to translate this data into human terms anyway...
+        content = "BINDING POCKET REPORT\n"
+        content += separator
+        content += f"\nSampling temperature: {self._nanopkt_data["Sampling_temperature"]}"
+        content += "\nAmino acid sequence:"
+        for aa_id in aa_sequence:
+            content += f"{aa_id}"
+
+        content += "\nRaw Statistics\n"
+
+        content += "\nSection 1: Biochemical Property Summary\n"
+        for summary, value in biochemical_sum.items():
+            content += f"|-- {summary}: {value:.3f}\n"
+
+        content += "\nSection 2: Geometric Analysis\n"
+        content += f"|-- X range: {coordinate_sum["X_coverage"]:.3f}\n"
+        content += f"|-- Y range: {coordinate_sum["Y_coverage"]:.3f}\n"
+        content += f"|-- Z range: {coordinate_sum["Z_coverage"]:.3f}\n"
+
+        content += separator
+        content += "\n===[ Notable Binding Pocket Characteristics ]===\n"
+        content += f"{biochemical_note}{receptor_style}"
+
+        return content
+
+
+    def biochemical_summary(self, aa_sequence):
         tmp_charge = []
         tmp_hydro = []
         tmp_flex = []
@@ -143,11 +174,76 @@ class PocketWatcher:
 
         for aa in aa_sequence:
             aa_summary = self.summary_vectors[aa]
-            tmp_charge.append(aa_summary['charge_env'])
+            tmp_charge.append(aa_summary['polar_character'])
             tmp_hydro.append(aa_summary['hydrophobicity'])
-            tmp_flex.append(aa_summary['net_flex'])
-            tmp_steric.append(aa_summary['net_steric_profile'])
+            tmp_flex.append(aa_summary['flexibility'])
+            tmp_steric.append(aa_summary['steric_accessibility'])
 
+        length = len(aa_sequence)
+        avg_charge = float(sum(tmp_charge) / length)
+        avg_hydro = float(sum(tmp_hydro) / length)
+        avg_flex = float(sum(tmp_flex) / length)
+        avg_steric = float(sum(tmp_steric) / length)
+
+        # measure how much this pocket deviates from a global average for each of the summary properties
+        avg_vector = self.summary_vectors['AVG']
+        charge_dev = float(((avg_charge - avg_vector['polar_character']) / avg_vector['polar_character']) * 100)
+        hydrophobicity_dev = float(((avg_hydro - avg_vector['hydrophobicity']) / avg_vector['hydrophobicity']) * 100)
+        flex_dev = float(((avg_flex - avg_vector['flexibility']) / avg_vector['flexibility']) * 100)
+        steric_dev = float(((avg_steric - avg_vector['steric_accessibility']) / avg_vector['steric_accessibility']) * 100)
+
+        notable_features = self.property_status_human_interpretable({
+            "polar_character": charge_dev,
+            "hydrophobic": hydrophobicity_dev,
+            "flexible": flex_dev,
+            "sterically accessible": steric_dev,
+        })
+
+        summary = {
+            'average_polar_character': avg_charge,
+            'polar_character_deviation_pct': charge_dev,
+            'average_hydrophobicity': avg_hydro,
+            'hydrophobicity_deviation_pct': hydrophobicity_dev,
+            'average_flexibility': avg_flex,
+            'flexibility_deviation_pct': flex_dev,
+            'average_steric': avg_steric,
+            'steric_deviation_pct': steric_dev,
+        }
+
+        return summary, notable_features
+
+    @staticmethod
+    def property_status_human_interpretable(properties):
+        notes = ""
+        for bio_property, deviation in properties.items():
+            label = f"{bio_property}" # add a space
+            magnitude = abs(deviation)
+            if magnitude < 10:
+                continue
+            if magnitude < 20:
+                adj = "slightly"
+            elif magnitude < 40:
+                adj = "moderately"
+            elif magnitude < 60:
+                adj = "highly"
+            elif magnitude < 80:
+                adj = "significantly"
+            else:
+                adj = "near-maximum"
+
+            if deviation < 0 and magnitude > 10:
+                if bio_property == "polar_character":
+                    label = "non-polar character"
+                elif bio_property == "hydrophobic":
+                    label = "hydrophilic"
+                elif bio_property == "flexible":
+                    label = "rigid"
+                else:  # sterically accessible
+                    label = "sterically inaccessible"
+
+            notes += f"{adj} {label}, "
+
+        return notes
 
     def coordinate_summary(self, xyz_skeleton):
         """
@@ -155,4 +251,56 @@ class PocketWatcher:
         :param xyz_skeleton:
         :return:
         """
-        pass
+        # so we have 3 dimensions -> x y z
+        # for each -> get the minimum and max values
+        # if min is -ve and max is +ve AND max - min >= 15 -> dimension = "BROAD"
+        # if...
+        # 3/3 dimensions = BROAD -> cage-style binding pocket
+        # 2/3 = BROAD -> chamber-style
+        # 1/3 = BROAD -> vice-style binding
+        # 0/3 = BROAD -> surface patch-style
+        broad_count = 0
+        x_coverage, x_is_broad = self.broad_check([coords[0] for coords in xyz_skeleton])
+        y_coverage, y_is_broad = self.broad_check([coords[1] for coords in xyz_skeleton])
+        z_coverage, z_is_broad = self.broad_check([coords[2] for coords in xyz_skeleton])
+
+        if x_is_broad:
+            broad_count += 1
+        if y_is_broad:
+            broad_count += 1
+        if z_is_broad:
+            broad_count += 1
+
+
+        # summary metrics + shape inference
+        if broad_count == 3:
+            receptor_style = "cage-style binding pocket"
+        elif broad_count == 2:
+            receptor_style = "chamber-style binding pocket"
+        elif broad_count == 1:
+            receptor_style = "vice-style binding pocket"
+        else: # broad count is still 0...
+            receptor_style = "surface patch-style binding pocket"
+
+
+        summary = {
+            'X_coverage': x_coverage,
+            'Y_coverage': y_coverage,
+            'Z_coverage': z_coverage,
+        }
+
+        return summary, receptor_style
+
+
+    def broad_check(self, numbers):
+        min_range = 0
+        max_range = 0
+        for number in numbers:
+            min_range = min(min_range, number)
+            max_range = max(max_range, number)
+
+        dim_coverage = max_range + abs(min_range)
+
+        if min_range < 0 < max_range and (dim_coverage >= self.pw_cfg["broad_threshold"]):
+                    return dim_coverage, True
+        return dim_coverage, False
