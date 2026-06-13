@@ -227,6 +227,7 @@ Training loss was computed as a running average over all batches, hence why the 
 | 3       | 0.646       | 0.482            | -0.165    |
 | 4       | 0.523       | 0.370            | -0.153    |
 | 5       | 0.443       | 0.317            | -0.126    |
+
 note: I do intend to train skeleton for 8 epochs total eventually, 
 but I ran out of hours on lightningai and I already spent 50 bucks on extra credits.
 Regardless, it's become apparent that Loss matters less than output sanity when it comes to 
@@ -249,7 +250,6 @@ evaluating how "good" each of these models is.
 
 TODO: 
 - Loss Curves
-- Pocket polarity analysis
 
 ---
 
