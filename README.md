@@ -38,12 +38,75 @@ git clone https://github.com/Elliot-Chan-120/NanoMaker.git
 cd NanoMaker
 pip install -r requirements.txt
 ```
+As a prototype in its early stages, NanoMaker is runnable through jupyter notebook.
 
 Then you can open "nanomaker_use.ipynb" and run the cells. I've attached a link to download the weights in this README, or you can copy the 
 database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
 I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. It took me over 48 hours to train both models.
 
 ### Test run for aspirin: 
+Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O". 
+After going through a run using the nanomaker_use.ipynb notebook. 
+We have the following visualization and data:
+- I've pruned the outputs to save space
+
+First, NanoMaker will produce a ".nanopkt" file in this specific format that downstream modules can parse, visualize and characterize.
+```
+>_0.3_ms7e84_c1ccccc1
+Target>_CC(=O)OC1=CC=CC=C1C(=O)O
+
+>__nnpkt
+E	[0.173, -15.92, -0.0297]
+E	[8.2984, -12.871, 1.6654]
+H	[-2.1276, -14.4948, 3.5951]
+C	[0.2286, -14.481, 2.6729]
+S	[0.3466, -14.3896, 1.8595]
+
+...
+
+I	[0.1374, 0.021, 1.1619]
+```
+
+The analysis module allows for various types of visualization depending on each amino acid's properties.
+Here I have visualized the pocket by each amino acid's [1] raw skeleton, [2] polar_character, and [3] hydrophobicity.
+The other options are: amino acid identity, steric accessibility (size and exposed surface vol.), and flexibility.
+The visualizations are done via plotly express, so in the notebook or window you can drag, zoom, and hover over each 
+node to see its identity and analysis values.
+
+|                       Raw Skeleton                       |                   Polar Character                   | Hydrophobicity                                                 |
+|:--------------------------------------------------------:|:---------------------------------------------------:|----------------------------------------------------------------|
+| ![metformin_skeleton.png](images/metformin_skeleton.png) | ![metformin_polar.png](images/metformin_polar.png)  | ![metformin_hydrophobic.png](images/metformin_hydrophobic.png) |
+
+NanoMaker's pocket analysis module allows for quantitative analysis of the binding pockets produced, as visual analysis might not be concrete enough.
+I've also included a "note-taking" function that records any notable standout features the binding pocket produced may exhibit.
+
+```
+BINDING POCKET REPORT
+==================================================
+Sampling temperature: 0.3
+Amino acid sequence:EEHCSRLRCGAISCVDTKKLAIIIGTNAQSHYKCANSPQVGQIIAGFDEHI
+==================================================
+
+Section 1: Biochemical Property Summary
+|-- average_polar_character: 0.209
+|-- polar_character_deviation_pct: 13.396
+|-- average_hydrophobicity: 0.202
+
+....
+
+Section 2: Geometric Analysis
+|-- X range: 19.767
+|-- Y range: 17.981
+|-- Z range: 8.065
+
+==================================================
+
+Notable Binding Pocket Characteristics:
+- slightly polar character, slightly hydrophilic, chamber-style binding pocket
+```
+Note that aspirin does have polar and hydrophilic character so the characteristics line up nice. See "Performance and Model Behaviour" for a more complete picture of how these models behave during generation.
+
+With that we've successfully generated, visualized and analyzed a protein binding pocket for Aspirin!
 
 ---
 
@@ -135,7 +198,7 @@ It does this continuously for each provided coordinate until the protein pocket 
 
 ## Data + Training
 Data is resolved protein-drug complexes from BindingDB and PDB with binding affinities of 0.1nM (extremely high affinity).
-Skeleton's loss was defined as a composite across MSE of radius and unit circle angle difference, with weighted emphasis on anglular orientation. 
+Skeleton's loss was defined as a composite across MSE of radius and unit circle angle difference, with weighted emphasis on angular orientation. 
 NAAnoBot's loss is MSE between predicted feature vectors and the target AA's feature vector (nAAno_token!).
 The data split was done according to drug scaffold identity rather than a random split after combinatorial explosion of drug vs. sequence windows. 
 
@@ -147,7 +210,7 @@ See Disclaimer at the bottom regarding novel chemistry generalization ability an
 
 ---
 
-## Model Performance and Behaviour: Loss & Model Health
+## Loss Metrics
 Skeleton and NAAnoBot went through the same train / validation drug scaffold identity split.
 Training loss was computed as a running average over all batches, hence why the initial epoch gaps are large.
 
@@ -164,10 +227,10 @@ Training loss was computed as a running average over all batches, hence why the 
 | 3       | 0.646       | 0.482            | -0.165    |
 | 4       | 0.523       | 0.370            | -0.153    |
 | 5       | 0.443       | 0.317            | -0.126    |
-| 6       | 0.          | 0.               | -0.       |
-| 7       | 0.          | 0.               | -0.       |
-| 8       | 0.          | 0.               | -0.       |
-
+note: I do intend to train skeleton for 8 epochs total eventually, 
+but I ran out of hours on lightningai and I already spent 50 bucks on extra credits.
+Regardless, it's become apparent that Loss matters less than output sanity when it comes to 
+evaluating how "good" each of these models is.
 
 **NAAnoBot Loss**: 
 ```
@@ -187,6 +250,50 @@ Training loss was computed as a running average over all batches, hence why the 
 TODO: 
 - Loss Curves
 - Pocket polarity analysis
+
+---
+
+## Performance and Model Behaviour Observations
+Since truly examining NAAnoBot's biochemical reasoning ability would require extensive analyses, 
+I decided to plot average protein pocket polar character over 10 generated pockets vs. 10 drug logP (hydrophobicity / polarity inferred) 
+values as a proxy for its potential biochemical reasoning ability. Sampling temperature was set to 0.01 (basically argmax) for maximum strictness and no variation. 
+Pockets produced were definitely not natural but were representative of NAAnoBot's behaviour.
+Polar character is an aggregate across net charge, hydrophobicity, # of H donors and H acceptors.
+
+This is a preliminary test and should not be interpreted as validation of binding-pocket realism.
+
+| Compound Name | LogP  | Protein Pocket Polar_character x10 (readability) |
+|---------------|-------|--------------------------------------------------|
+| methotrexate  | -1.85 | 3.84103                                          |
+| caffeine      | -0.07 | 0.5391                                           |
+| ciproflaxin   | 0.28  | 2.77451                                          |
+| benzene       | 2.13  | 1.347                                            |
+| diazepam      | 2.82  | 4.0941                                           |
+| cyclosporin A | 2.92  | 2.452                                            |
+| testosterone  | 3.32  | 3.4497                                           |
+| paclitaxel    | 3.96  | 1.2955                                           |
+| atorvastatin  | 4.46  | 4.81607                                          |
+| cholesterol   | 8.74  | 5.1344                                           |
+
+| Benchmark Graph: Compound LogP vs Protein Polar Character * 10 |
+|----------------------------------------------------------------| 
+| ![benchmark_linegraph.png](images/benchmark_linegraph.png)     |                                                          |
+
+Visual obervations show that there is a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
+There are a few spikes that appear out of place, which are most likely due to some of the chemical compounds' scaffolds being widely different from their original identity.
+This is consistent with the disclaimer mentioned below that molecules whose R groups contribute heavily to binding dynamics are not reliable and should be treated as scaffold-level
+blueprints rather than actual protein pocket templates (none of NanoMaker's outputs should be anyway but you get the point). 
+Furthermore, other small drugs that were planning on being tested like urea had empty scaffolds where the scaffold would literally be "". 
+So its impossible to tell how well NAAnoBot would generalize to such molecules who literally don't have scaffolds. 
+
+Observationally, it appears there is a link between Skeleton's choices in protein cage design and molecule size. 
+Throughout the process of making NanoMaker, I noticed that dominant pocket styles for larger SMILES (more characters) 
+and generally, larger scaffolds, were "chambers" (think of a cupped hand). For smaller molecules, surface-like patches and vice-shaped pockets were more common.
+All pockets synthesized stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
+
+Overall, this project demonstrates that the architecture can generate structurally varied protein binding pockts whose 
+aggregated biochemical properties appear to vary with the ligand scaffold's features. Further validation would be needed
+to confirm if amino acid selection patterns are truly biochemically reasoned within NAAnoBot, as of right now it remains an open question.
 
 ---
 

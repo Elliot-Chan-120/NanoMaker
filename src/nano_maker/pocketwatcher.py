@@ -68,6 +68,8 @@ class PocketWatcher:
                             color_continuous_scale=self.pw_cfg['colorscales'][identifier],
                             hover_data='ID')
 
+        fig.update_traces(marker_size=5)
+
         fig.update_layout(
             paper_bgcolor=self.pw_cfg["paper_bgcolor"],
             scene=dict(
@@ -140,7 +142,6 @@ class PocketWatcher:
 
         separator = "=" * 50
         # now piece everything together in a small summary
-        # holy crap i might as well import some LLM to translate this data into human terms anyway...
         content = "BINDING POCKET REPORT\n"
         content += separator
         content += f"\nSampling temperature: {self._nanopkt_data["Sampling_temperature"]}"
@@ -148,20 +149,20 @@ class PocketWatcher:
         for aa_id in aa_sequence:
             content += f"{aa_id}"
 
-        content += "\nRaw Statistics\n"
-
-        content += "\nSection 1: Biochemical Property Summary\n"
+        content += "\n"
+        content += separator
+        content += "\n\nSection 1: Biochemical Property Summary\n"
         for summary, value in biochemical_sum.items():
             content += f"|-- {summary}: {value:.3f}\n"
 
         content += "\nSection 2: Geometric Analysis\n"
         content += f"|-- X range: {coordinate_sum["X_coverage"]:.3f}\n"
         content += f"|-- Y range: {coordinate_sum["Y_coverage"]:.3f}\n"
-        content += f"|-- Z range: {coordinate_sum["Z_coverage"]:.3f}\n"
+        content += f"|-- Z range: {coordinate_sum["Z_coverage"]:.3f}\n\n"
 
         content += separator
-        content += "\n===[ Notable Binding Pocket Characteristics ]===\n"
-        content += f"{biochemical_note}{receptor_style}"
+        content += "\n\nNotable Binding Pocket Characteristics:\n"
+        content += f"- {biochemical_note}{receptor_style}"
 
         return content
 
@@ -193,7 +194,7 @@ class PocketWatcher:
         steric_dev = float(((avg_steric - avg_vector['steric_accessibility']) / avg_vector['steric_accessibility']) * 100)
 
         notable_features = self.property_status_human_interpretable({
-            "polar_character": charge_dev,
+            "polar character": charge_dev,
             "hydrophobic": hydrophobicity_dev,
             "flexible": flex_dev,
             "sterically accessible": steric_dev,
@@ -216,7 +217,7 @@ class PocketWatcher:
     def property_status_human_interpretable(properties):
         notes = ""
         for bio_property, deviation in properties.items():
-            label = f"{bio_property}" # add a space
+            label = f"{bio_property}"
             magnitude = abs(deviation)
             if magnitude < 10:
                 continue
@@ -229,10 +230,11 @@ class PocketWatcher:
             elif magnitude < 80:
                 adj = "significantly"
             else:
-                adj = "near-maximum"
+                adj = "extremely"
+            # TODO: refine the groupings later -> pretty arbitrary at the moment.
 
             if deviation < 0 and magnitude > 10:
-                if bio_property == "polar_character":
+                if bio_property == "polar character":
                     label = "non-polar character"
                 elif bio_property == "hydrophobic":
                     label = "hydrophilic"
@@ -247,7 +249,6 @@ class PocketWatcher:
 
     def coordinate_summary(self, xyz_skeleton):
         """
-        I think i've converted from xyz to spherical to xyz back again and now back to spherical for the summary...
         :param xyz_skeleton:
         :return:
         """
