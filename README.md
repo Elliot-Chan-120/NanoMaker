@@ -73,9 +73,12 @@ The other options are: amino acid identity, steric accessibility (size and expos
 The visualizations are done via plotly express, so in the notebook or window you can drag, zoom, and hover over each 
 node to see its identity and analysis values.
 
-|                       Raw Skeleton                       |                   Polar Character                   | Hydrophobicity                                                 |
-|:--------------------------------------------------------:|:---------------------------------------------------:|----------------------------------------------------------------|
-| ![metformin_skeleton.png](images/metformin_skeleton.png) | ![metformin_polar.png](images/metformin_polar.png)  | ![metformin_hydrophobic.png](images/metformin_hydrophobic.png) |
+| Visualization-type |                                                                |
+|--------------------|----------------------------------------------------------------| 
+| Raw Skeleton       | ![metformin_skeleton.png](images/metformin_skeleton.png)       |
+| Polar Character    | ![metformin_polar.png](images/metformin_polar.png)             |
+| Hydrophobicity     | ![metformin_hydrophobic.png](images/metformin_hydrophobic.png) |
+
 
 NanoMaker's pocket analysis module allows for quantitative analysis of the binding pockets produced, as visual analysis might not be concrete enough.
 I've also included a "note-taking" function that records any notable standout features the binding pocket produced may exhibit.
