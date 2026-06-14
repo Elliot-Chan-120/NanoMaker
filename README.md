@@ -373,8 +373,6 @@ Furthermore, splitting by scaffold means that during inference, molecules whose 
 binding dynamics are not well-generalized, and binding pockets generated for these "R group-dependent" molecules 
 should be treated as scaffold-level rather than R-group-specific generations. 
 
-A chemical similarity metric (Tanimoto similarity) is provided at inference to indicate how well-represented the 
-input chemical's scaffold is in the training data.
 
 <br>
 
