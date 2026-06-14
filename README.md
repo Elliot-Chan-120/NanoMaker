@@ -152,6 +152,11 @@ I've included a separate test run for vitamin C in the source files.
 
 ---
 
+## Transforming the Protein Space
+Transformers are sequence models famously known for operating on tokens within natural language processing... but protein binding pockets
+are not sentences to be translated, they're 3D structures with each node representing a unique biochemical environment.
+NanoMaker employs a unique method to convert these 3D biochemical environments into a sequential representation Skeleton and NAAnoBot can learn from.
+
 ## (Inverse) Radial Sequencing
 I imagined the space around an arbitary drug centroid as a series of spherical shells, with each sequential shell's radius increasing. 
 Think of a glass ball within a glass ball many times over, with the outermost glass ball being the largest and vice versa.
