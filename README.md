@@ -5,7 +5,7 @@
 
 A personal research prototype, NanoMaker is a dual cross-attention transformer system that generates a 3D arrangement of amino acid (AA) residues' alpha carbons 
 that would form a high-affinity binding area to any given chemical's scaffold in SMILES format. 
-These can then be used as protein pocket patch templates for drug-delivery molecules. NanoMaker also comes with a visualization 
+These can then be used as protein binding pocket templates for drug-delivery molecules. NanoMaker also comes with a visualization 
 and characterization module, allowing for downstream analyses.
 
 NanoMaker separates the challenge of de novo protein design into two cross-attention transformer tasks. 
@@ -63,6 +63,9 @@ to train with your own parameters.
 I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. 
 It took me over 48 hours to train both models.
 
+Once you have the model weights, move them here, where the config.py file lives: ```src/nano_maker/container```
+
+
 ### Test run for aspirin: 
 Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O". 
 After going through a run using the nanomaker_use.ipynb notebook. 
@@ -104,11 +107,11 @@ cli command:
 python3 nnmkr.py visualize aspirin [insert visualization mode here] --save <- if you want to save it as html, leave blank if not needed
 ```
 
-| Visualization type |                                                                |
-|--------------------|----------------------------------------------------------------| 
-| Raw Skeleton       | ![metformin_skeleton.png](images/metformin_skeleton.png)       |
-| Polar Character    | ![metformin_polar.png](images/metformin_polar.png)             |
-| Hydrophobicity     | ![metformin_hydrophobic.png](images/metformin_hydrophobic.png) |
+| Visualization type   | Image                                                        |
+|----------------------|--------------------------------------------------------------| 
+| skeleton             | ![aspirin_skeleton.png](images/aspirin_skeleton.png)         |
+| polar_character      | ![aspirin_polarchar.png](images/aspirin_polarchar.png)       |
+| steric_accessibility | ![aspirin_stericaccess.png](images/aspirin_stericaccess.png) |
 
 
 NanoMaker's pocket analysis module allows for quantitative analysis of the binding pockets produced, as visual analysis might not be concrete enough.
@@ -146,6 +149,7 @@ Notable Binding Pocket Characteristics:
 Note that aspirin does have polar and hydrophilic character so the characteristics line up nice. See "Performance and Model Behaviour" for a more complete picture of how these models behave during generation.
 
 With that we've successfully generated, visualized and analyzed a protein binding pocket for Aspirin!
+I've included a separate test run for vitamin C in the source files.
 
 ---
 
