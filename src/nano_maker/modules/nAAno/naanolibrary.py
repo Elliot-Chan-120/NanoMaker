@@ -167,7 +167,7 @@ PROPENSITIES = {
 }
 
 
-#Jaroslav Koča, Zdeněk Kříž, Per H.J. Carlsen,
+# Jaroslav Koča, Zdeněk Kříž, Per H.J. Carlsen,
 # Computer study of conformational flexibility of 20 common amino acids,
 # Journal of Molecular Structure: THEOCHEM,
 # Volume 306, Issues 2–3,

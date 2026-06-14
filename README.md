@@ -14,7 +14,7 @@ while model 2, **NAAnoBot**, slots amino acids (AAs) into the empty coordinates 
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein pocket is specific to the given drug's properties.
 
-I've drawn out an example skeleton and its populated final form:
+I've drawn out a conceptual example skeleton and its populated final form, you can see what they look like in practice further down:
 
 |        Figure 1: 3D arrangement / "skeleton"         |       Figure 2: Full NanoMaker-generated pocket        |
 |:----------------------------------------------------:|:------------------------------------------------------:|
@@ -51,10 +51,6 @@ Install requirements
 pip install -r requirements.txt
 ```
 
-NanoMaker is runnable through jupyter notebook. 
-I've provided a "nanomaker_use.ipynb" which guides the user through a typical run.
-NanoMaker is also runnable through the cli, all commands are covered here.
-
 I've created a separate repo where you can download the model weights:
 https://huggingface.co/ElliotChan120/NanoMakers
 
@@ -63,21 +59,25 @@ to train with your own parameters.
 I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. 
 It took me over 48 hours to train both models.
 
-Once you have the model weights, move them here, where the config.py file lives: ```src/nano_maker/container```
+Once you have the model weights, move them here, where the config.py file lives: ```src/nano_maker/container```.
 
+### Test run for aspirin:
+NanoMaker is runnable through both JupyterLab and the CLI, whose commands are covered below. 
+I've also included a "nanomaker_use.ipynb" file that guides the user through a typical run. 
+This section covers what a typical run should resemble when executing all cells in the guide file or all cli commands:
 
-### Test run for aspirin: 
-Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O". 
-After going through a run using the nanomaker_use.ipynb notebook. 
-We have the following visualization and data:
+Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O".
 
 First, NanoMaker will produce a ".nanopkt" file in this specific format that downstream modules can parse, visualize and characterize.
 
 The cli command for this is 
 ```
 (from root)
-python3 nnmkr.py generate "CC(=O)OC1=CC=CC=C1C(=O)O" aspirin
-                          # smiles needs parentheses
+python3 nnmkr.py generate "CC(=O)OC1=CC=CC=C1C(=O)O" aspirin --temp 0.3
+                          # smiles needs parentheses         # sampling_temperature: 
+                                                               - how "strict" the amino acid choices are
+                                                               - 0.3 by default
+                                                               - lower = stricter and vice versa
 ```
 
 ```
@@ -97,8 +97,8 @@ I	[0.1374, 0.021, 1.1619]
 ```
 
 The analysis module allows for various types of visualization depending on each amino acid's properties.
-Here I have visualized the pocket by each amino acid's [1] raw skeleton, [2] polar_character, and [3] hydrophobicity.
-The other options are: amino acid identity, steric accessibility (size and exposed surface vol.), and flexibility.
+Here I have visualized the pocket by each amino acid's [1] raw skeleton, [2] polar_character, and [3] steric_accessibility (size and exposed surface vol.).
+The other options are: amino acid identity, hydrophobicity, and flexibility.
 The visualizations are done via plotly express, so in the notebook or window you can drag, zoom, and hover over each 
 node to see its identity and analysis values.
 
@@ -112,7 +112,6 @@ python3 nnmkr.py visualize aspirin [insert visualization mode here] --save <- if
 | skeleton             | ![aspirin_skeleton.png](images/aspirin_skeleton.png)         |
 | polar_character      | ![aspirin_polarchar.png](images/aspirin_polarchar.png)       |
 | steric_accessibility | ![aspirin_stericaccess.png](images/aspirin_stericaccess.png) |
-
 
 NanoMaker's pocket analysis module allows for quantitative analysis of the binding pockets produced, as visual analysis might not be concrete enough.
 I've also included a "note-taking" function that records any notable standout features the binding pocket produced may exhibit.
@@ -237,6 +236,9 @@ NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says:
 Once the biochemical feature vector is produced, it is then matched against all amino acid feature vectors to determine its best fit.
 It does this continuously for each provided coordinate until the protein pocket is completed.
 
+For more information on the how each amino acid is characterized biochemically, the source file "naanolibrary.py" 
+in src/nano_maker/modules/nAAno contains the sources + citations and some comments further clarifying the feature engineering scheme.
+
 ---
 
 ## Data + Training
@@ -307,22 +309,22 @@ This is a preliminary test and should not be interpreted as validation of bindin
 
 | Compound Name | LogP  | Protein Pocket Polar_character x10 (readability) |
 |---------------|-------|--------------------------------------------------|
-| methotrexate  | -1.85 | 3.84103                                          |
+| methotrexate  | -1.85 | 3.8410                                           |
 | caffeine      | -0.07 | 0.5391                                           |
-| ciproflaxin   | 0.28  | 2.77451                                          |
-| benzene       | 2.13  | 1.347                                            |
+| ciproflaxin   | 0.28  | 2.7745                                           |
+| benzene       | 2.13  | 1.3470                                           |
 | diazepam      | 2.82  | 4.0941                                           |
-| cyclosporin A | 2.92  | 2.452                                            |
+| cyclosporin A | 2.92  | 2.4520                                           |
 | testosterone  | 3.32  | 3.4497                                           |
 | paclitaxel    | 3.96  | 1.2955                                           |
-| atorvastatin  | 4.46  | 4.81607                                          |
+| atorvastatin  | 4.46  | 4.8161                                           |
 | cholesterol   | 8.74  | 5.1344                                           |
 
 | Benchmark Graph: Compound LogP vs Protein Polar Character * 10 |
 |----------------------------------------------------------------| 
 | ![benchmark_linegraph.png](images/benchmark_linegraph.png)     |                                                          |
 
-Visual obervations show that there is a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
+Visual observations show that there is a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
 There are a few spikes that appear out of place, which are most likely due to some of the chemical compounds' scaffolds being widely different from their original identity.
 This is consistent with the disclaimer mentioned below that molecules whose R groups contribute heavily to binding dynamics are not reliable and should be treated as scaffold-level
 blueprints rather than actual protein pocket templates (none of NanoMaker's outputs should be anyway but you get the point). 
@@ -334,7 +336,7 @@ Throughout the process of making NanoMaker, I noticed that dominant pocket style
 and generally, larger scaffolds, were "chambers" (think of a cupped hand). For smaller molecules, surface-like patches and vice-shaped pockets were more common.
 All pockets synthesized stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
 
-Overall, this project demonstrates that the architecture can generate structurally varied protein binding pockts whose 
+Overall, this project demonstrates that the architecture can generate structurally varied protein binding pockets whose 
 aggregated biochemical properties appear to vary with the ligand scaffold's features. Further validation would be needed
 to confirm if amino acid selection patterns are truly biochemically reasoned within NAAnoBot, as of right now it remains an open question.
 
