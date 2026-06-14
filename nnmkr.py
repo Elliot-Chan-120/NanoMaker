@@ -1,10 +1,13 @@
 # Entry point for nanomaker's functionality
 from src.nano_maker.paths import *
+from src.nano_maker.container.configs import *
 from src.nano_maker.nanomaker import NanoMaker
 from src.nano_maker.pocketwatcher import PocketWatcher
+from src.nano_maker.utility import *
 
 import argparse
 import sys
+import re
 
 # 1. generate
 # -> input: smiles and outputfilename
@@ -20,17 +23,74 @@ import sys
 # checks: valid filename
 # -> output: report function of visualization
 
+# initialize NanoMaker system
+nnmkr = NanoMaker(
+    version_code=version_code,
+    skeleton_weight_filename=skeleton_weight_filename,
+    naanobot_weight_filename=naanobot_weight_filename,
+    skeleton_cfg=skeleton_config,
+    naanobot_cfg=naanobot_config,
+    radial_cfg=radial_config
+)
+
+pkt_wtchr = PocketWatcher(
+    naanoeng_config=naanoeng_config,
+    pocket_config=pocketwatcher_config
+)
+
 def generate(args):
-    pass
+    smiles_str = args.smiles
+    sampling_temp = args.temp if args.temp is not None else 0.3
+    if not (0.01 <= sampling_temp <= 1):
+        print('temp must be a float between 0.01 and 1')
+        sys.exit()
+    output_filename = sanitize_filename(args.o) if args.o is not None else None
+
+
+    nnmkr.ingest_chemical(smiles_str)
+    pocket_data = nnmkr.generate_nanopkt_data(sampling_temp=sampling_temp)
+    save_nano_pocket(pocket_data, output_filename)
+    return True
+
+
+def sanitize_filename(string):
+    string = string.strip()
+    string = re.sub(r"[^\w.\-]", "_", string)
+    string = re.sub(r"_+", "_", string)
+    return string
 
 
 def visualize(args):
-    pass
+    a_file = args.access
+    if not file_exists(a_file):
+        print(f"{a_file} not found in output container")
+        return False
+    o_file = args.access if args.save is True else None   # file will have the same name if save turned on
+    identifier = args.mode
+    pkt_wtchr.ingest_file(a_file)
+    pkt_wtchr.visualize_pocket(identifier, o_file)
+    return True
 
 
 def report(args):
-    pass
+    a_file = args.access
+    if not file_exists(a_file):
+        print(f"{a_file} not found in output container")
+        return False
+    o_file = args.access if args.save is True else None
 
+    pkt_wtchr.ingest_file(a_file)
+    report_contents = pkt_wtchr.pocket_report(o_file)
+    print(report_contents)
+    return True
+
+
+def file_exists(filename):
+    filepath = POCKET_DATA / f"{filename}.nanopkt"
+    if filepath.is_file():
+        return True
+    else:
+        return False
 
 
 def main():
@@ -71,6 +131,11 @@ def main():
     )
 
     gen_nnpkt.add_argument(
+        '--temp',
+        type=float,
+    )
+
+    gen_nnpkt.add_argument(
         'o',
         type=str
     )
@@ -93,14 +158,13 @@ def main():
     )
 
     vis_nnpkt.add_argument(
-        '--o',
-        type=str
+        '--save',
+        action='store_true'
     )
 
     # [3] report
     rep_nnpkt = subparsers.add_parser(
         'report',
-        type=str,
     )
 
     rep_nnpkt.add_argument(
@@ -109,8 +173,8 @@ def main():
     )
 
     rep_nnpkt.add_argument(
-        '--o',
-        type=str,
+        '--save',
+        action='store_true',
     )
 
     args = parser.parse_args()

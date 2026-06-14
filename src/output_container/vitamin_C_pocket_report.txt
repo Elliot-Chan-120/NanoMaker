@@ -1,0 +1,25 @@
+BINDING POCKET REPORT
+==================================================
+Sampling temperature: 0.3
+Amino acid sequence:ESKGFCRAIAYVYWDNVKKAGAFPCNTSGGDFGGEYH
+==================================================
+
+Section 1: Biochemical Property Summary
+|-- average_polar_character: 0.180
+|-- polar_character_deviation_pct: -2.439
+|-- average_hydrophobicity: 0.179
+|-- hydrophobicity_deviation_pct: -22.143
+|-- average_flexibility: 3.811
+|-- flexibility_deviation_pct: 17.529
+|-- average_steric: 2.176
+|-- steric_deviation_pct: -5.504
+
+Section 2: Geometric Analysis
+|-- X range: 16.490
+|-- Y range: 11.671
+|-- Z range: 6.252
+
+==================================================
+
+Notable Binding Pocket Characteristics:
+- moderately hydrophilic, slightly flexible, surface patch-style binding pocket

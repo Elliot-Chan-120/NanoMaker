@@ -33,14 +33,28 @@ Notes:
 ---
 
 ## NanoMaking
+Installation + start virtual environment
 ```
 git clone https://github.com/Elliot-Chan-120/NanoMaker.git
 cd NanoMaker
+python3 -m venv .venv
+```
+
+Activate virtual environment
+```
+source .venv/bin/activate  <- Linux
+source .venv/Scripts/activate  <- Windows I think
+```
+
+Install requirements
+```
 pip install -r requirements.txt
 ```
-As a prototype in its early stages, NanoMaker is runnable through jupyter notebook.
+NanoMaker is runnable through jupyter notebook. 
+I've provided a "nanomaker_use.ipynb" which guides the user through a typical run.
+NanoMaker is also runnable through the cli, all commands are covered here.
 
-Then you can open "nanomaker_use.ipynb" and run the cells. I've attached a link to download the weights in this README, or you can copy the 
+I've attached a link to download the weights in this README, or you can copy the 
 database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
 I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. It took me over 48 hours to train both models.
 
@@ -48,9 +62,16 @@ I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford
 Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O". 
 After going through a run using the nanomaker_use.ipynb notebook. 
 We have the following visualization and data:
-- I've pruned the outputs to save space
 
 First, NanoMaker will produce a ".nanopkt" file in this specific format that downstream modules can parse, visualize and characterize.
+
+The cli command for this is 
+```
+(from root)
+python3 nnmkr.py generate "CC(=O)OC1=CC=CC=C1C(=O)O" aspirin
+                          # smiles needs parentheses
+```
+
 ```
 >_0.3_ms7e84_c1ccccc1
 Target>_CC(=O)OC1=CC=CC=C1C(=O)O
@@ -62,7 +83,7 @@ H	[-2.1276, -14.4948, 3.5951]
 C	[0.2286, -14.481, 2.6729]
 S	[0.3466, -14.3896, 1.8595]
 
-...
+... I've pruned the data to save space
 
 I	[0.1374, 0.021, 1.1619]
 ```
@@ -73,6 +94,11 @@ The other options are: amino acid identity, steric accessibility (size and expos
 The visualizations are done via plotly express, so in the notebook or window you can drag, zoom, and hover over each 
 node to see its identity and analysis values.
 
+cli command:
+```
+python3 nnmkr.py visualize aspirin [insert visualization mode here] --save <- if you want to save it as html, leave blank if not needed
+```
+
 | Visualization type |                                                                |
 |--------------------|----------------------------------------------------------------| 
 | Raw Skeleton       | ![metformin_skeleton.png](images/metformin_skeleton.png)       |
@@ -82,6 +108,11 @@ node to see its identity and analysis values.
 
 NanoMaker's pocket analysis module allows for quantitative analysis of the binding pockets produced, as visual analysis might not be concrete enough.
 I've also included a "note-taking" function that records any notable standout features the binding pocket produced may exhibit.
+
+cli command:
+```
+python3 nnmkr.py report aspirin --save
+```
 
 ```
 BINDING POCKET REPORT

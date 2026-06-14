@@ -36,6 +36,7 @@ class PocketWatcher:
         \n hydrophobicity
         \n flexibility
         \n steric_accessibility
+        :param outfile_name:
         :return:
         """
         raw_coords = self._nanopkt_data["3D_skeleton"]
@@ -126,15 +127,19 @@ class PocketWatcher:
 
         ))
 
-        fig.show()
-
+        # verified it works through cli
         if outfile_name:
-            fig.write_html(self.outpath / f"{outfile_name}_{identifier}.html")
+            output_path = self.outpath / f"{outfile_name}_{identifier}.html"
+            fig.write_html(output_path)
+            print(f"{outfile_name} visualization saved in {output_path}")
+
+
+        fig.show()
 
 
     # pt3 -> perform statistical analysis on the amino acid pocket
     # geometry and biochemical analysis
-    def pocket_report(self, outfile_name=None, verbose=True):
+    def pocket_report(self, outfile_name=None):
         raw_coords = self._nanopkt_data["3D_skeleton"]
         aa_sequence = self._nanopkt_data["aa_sequence"]
         # proximal_threshold = self.pw_cfg["proximal_threshold"]
@@ -166,9 +171,11 @@ class PocketWatcher:
         content += "\n\nNotable Binding Pocket Characteristics:\n"
         content += f"- {biochemical_note}{receptor_style}"
 
-
         if outfile_name:
-            (self.outpath / f"{outfile_name}_report.txt").write(content)
+            output_path = self.outpath / f"{outfile_name}_report.txt"
+            with open (output_path, 'w', encoding='utf-8') as file:
+                file.write(content)
+            print(f"{outfile_name} report saved at {output_path}")
 
         return content
 
