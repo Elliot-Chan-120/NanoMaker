@@ -70,7 +70,7 @@ Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O".
 
 First, NanoMaker will produce a ".nanopkt" file in this specific format that downstream modules can parse, visualize and characterize.
 
-The cli command for this is 
+The cli command for this is:
 ```
 (from root)
 python3 nnmkr.py generate "CC(=O)OC1=CC=CC=C1C(=O)O" aspirin --temp 0.3
@@ -80,6 +80,7 @@ python3 nnmkr.py generate "CC(=O)OC1=CC=CC=C1C(=O)O" aspirin --temp 0.3
                                                                - lower = stricter and vice versa
 ```
 
+aspirin.nanopkt file:
 ```
 >_0.3_ms7e84_c1ccccc1
 Target>_CC(=O)OC1=CC=CC=C1C(=O)O
