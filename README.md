@@ -50,13 +50,18 @@ Install requirements
 ```
 pip install -r requirements.txt
 ```
+
 NanoMaker is runnable through jupyter notebook. 
 I've provided a "nanomaker_use.ipynb" which guides the user through a typical run.
 NanoMaker is also runnable through the cli, all commands are covered here.
 
-I've attached a link to download the weights in this README, or you can copy the 
-database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) to train with your own parameters.
-I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. It took me over 48 hours to train both models.
+I've created a separate repo where you can download the model weights:
+https://huggingface.co/ElliotChan120/NanoMakers
+
+Or you can copy the database files and prototyping notebooks into a cloud server like colab or lightningai (i prefer that one) 
+to train with your own parameters.
+I used a T4 GPU on LightningAI, but if you have a good nvidia gpu and can afford a few days that's fine too. 
+It took me over 48 hours to train both models.
 
 ### Test run for aspirin: 
 Aspirin's chemical smiles is: "CC(=O)OC1=CC=CC=C1C(=O)O". 
