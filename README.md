@@ -42,8 +42,8 @@ python3 -m venv .venv
 
 Activate virtual environment
 ```
-source .venv/bin/activate  <- Linux
-source .venv/Scripts/activate  <- Windows I think
+source .venv/bin/activate  <- Linux and Mac
+source .venv/Scripts/activate  <- Windows
 ```
 
 Install requirements
