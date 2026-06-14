@@ -1,9 +1,10 @@
 # Entry point for nanomaker's functionality
-from jinja2.compiler import generate
-
 from src.nano_maker.paths import *
+from src.nano_maker.nanomaker import NanoMaker
+from src.nano_maker.pocketwatcher import PocketWatcher
 
 import argparse
+import sys
 
 # 1. generate
 # -> input: smiles and outputfilename
@@ -18,6 +19,19 @@ import argparse
 # -> input: access filename, output filename (optional)
 # checks: valid filename
 # -> output: report function of visualization
+
+def generate(args):
+    pass
+
+
+def visualize(args):
+    pass
+
+
+def report(args):
+    pass
+
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -62,42 +76,54 @@ def main():
     )
 
     # [2] visualize
-    visualize = subparsers.add_parser(
+    vis_nnpkt = subparsers.add_parser(
         'visualize',
     )
 
-    visualize.add_argument(
+    vis_nnpkt.add_argument(
         'access',
         type=str,
     )
 
-    visualize.add_argument(
+    vis_nnpkt.add_argument(
         'mode',
         type=str,
         choices = ['skeleton', 'color_code', 'polar_character', 'hydrophobicity', 'flexibility', 'steric_accessibility']
 
     )
 
-    visualize.add_argument(
+    vis_nnpkt.add_argument(
         '--o',
         type=str
     )
 
     # [3] report
-    report = subparsers.add_parser(
+    rep_nnpkt = subparsers.add_parser(
         'report',
         type=str,
     )
 
-    report.add_argument(
+    rep_nnpkt.add_argument(
         'access',
         type=str
     )
 
-    report.add_argument(
+    rep_nnpkt.add_argument(
         '--o',
         type=str,
     )
+
+    args = parser.parse_args()
+    if args.command is None:
+        parser.print_help()
+        sys.exit(0)
+
+    if args.command == 'generate':
+        generate(args)
+    elif args.command == 'visualize':
+        visualize(args)
+    elif args.command == 'report':
+        report(args)
 
 
 if __name__ == "__main__":
