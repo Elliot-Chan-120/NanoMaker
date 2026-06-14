@@ -242,7 +242,7 @@ NAAnoBot doesn't say "Valine" or "Leucine" belongs here, instead it says:
 Once the biochemical feature vector is produced, it is then matched against all amino acid feature vectors to determine its best fit.
 It does this continuously for each provided coordinate until the protein pocket is completed.
 
-For more information on the how each amino acid is characterized biochemically, the source file "naanolibrary.py" 
+For more information on how each amino acid is characterized biochemically, the source file "naanolibrary.py" 
 in src/nano_maker/modules/nAAno contains the sources + citations and some comments further clarifying the feature engineering scheme.
 
 ---
