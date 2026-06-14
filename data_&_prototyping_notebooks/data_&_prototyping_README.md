@@ -1,4 +1,6 @@
-This folder contains all the jupyter notebooks I used to mine data online.
+This folder contains all the jupyter notebooks I used to datamine.
+These are intended to be run from an IDE or jupyterlab
+
 All data starts off with this:
 
 BindingDB data:

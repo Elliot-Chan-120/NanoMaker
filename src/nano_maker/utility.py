@@ -1,4 +1,4 @@
-from src.paths import *
+from src.nano_maker.paths import *
 
 #globals
 

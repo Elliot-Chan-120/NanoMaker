@@ -1,9 +1,7 @@
-import torch
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-from src.paths import *
 from src.nano_maker.utility import *
 from src.nano_maker.modules.nAAno.naanoeng import NAAnoEng
 
@@ -14,6 +12,7 @@ class PocketWatcher:
         self._NAAnoEng_module = NAAnoEng(naanoeng_config["max_angstroms"], naanoeng_config["block_size"], verbose=False)
         self._NAAnoEng_module.initialize()
         self.summary_vectors = self._NAAnoEng_module.summary_vectors()
+        self.outpath = POCKET_DATA
 
         self.pw_cfg = pocket_config
 
@@ -29,7 +28,7 @@ class PocketWatcher:
         self._nanopkt_data = pocket_data
 
 
-    def visualize_pocket(self, identifier="skeleton"):
+    def visualize_pocket(self, identifier="skeleton", outfile_name=None):
         """
         :param identifier: color codes AAs by properties
         \n default setting = skeleton -> amino acid vs ligand centroid but will still show the aa id
@@ -129,10 +128,13 @@ class PocketWatcher:
 
         fig.show()
 
+        if outfile_name:
+            fig.write_html(self.outpath / f"{outfile_name}_{identifier}.html")
+
 
     # pt3 -> perform statistical analysis on the amino acid pocket
     # geometry and biochemical analysis
-    def pocket_report(self, verbose=True):
+    def pocket_report(self, outfile_name=None, verbose=True):
         raw_coords = self._nanopkt_data["3D_skeleton"]
         aa_sequence = self._nanopkt_data["aa_sequence"]
         # proximal_threshold = self.pw_cfg["proximal_threshold"]
@@ -164,7 +166,12 @@ class PocketWatcher:
         content += "\n\nNotable Binding Pocket Characteristics:\n"
         content += f"- {biochemical_note}{receptor_style}"
 
+
+        if outfile_name:
+            (self.outpath / f"{outfile_name}_report.txt").write(content)
+
         return content
+
 
 
     def biochemical_summary(self, aa_sequence):

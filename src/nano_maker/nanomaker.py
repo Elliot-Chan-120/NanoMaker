@@ -1,12 +1,10 @@
 # Once the full transformer architecture is up I'll put it here
 # right now just have it generate the skeleton -> once naanobot is in we add in its functionality to this
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-from src.paths import *
+from src.nano_maker.paths import *
 from src.nano_maker.modules.nAAno.smiles_handler import *
 from src.nano_maker.modules.nAAno.radialseeker import RadialSeeker
 from src.nano_maker.skeleton import Skeleton

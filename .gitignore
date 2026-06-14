@@ -15,6 +15,9 @@ build/
 
 .ipynb_checkpoints/
 .jupyter/
+
+data_&_prototyping_notebooks/zerobind_notes.txt
+
 database/BindingDB_All_202605_tsv.zip
 src/nano_maker/modules/data_handling/unique_pdb_cache.csv
 
@@ -29,3 +32,5 @@ database/skeleton_test_pointers.parquet
 database/skeleton_training_pointers.parquet
 database/naanobot_test_pointers.parquet
 database/naanobot_training_pointers.parquet
+
+src/output_container/*.html

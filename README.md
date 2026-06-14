@@ -73,7 +73,7 @@ The other options are: amino acid identity, steric accessibility (size and expos
 The visualizations are done via plotly express, so in the notebook or window you can drag, zoom, and hover over each 
 node to see its identity and analysis values.
 
-| Visualization-type |                                                                |
+| Visualization type |                                                                |
 |--------------------|----------------------------------------------------------------| 
 | Raw Skeleton       | ![metformin_skeleton.png](images/metformin_skeleton.png)       |
 | Polar Character    | ![metformin_polar.png](images/metformin_polar.png)             |
