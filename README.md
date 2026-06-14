@@ -298,10 +298,6 @@ evaluating how "good" each of these models is.
 | 4       | 1.120       | 1.0946           | -0.0249   |
 | 5       | 1.114       | 1.0937           | -0.0205   |
 
-
-TODO: 
-- Loss Curves
-
 ---
 
 ## Performance and Model Behaviour Observations
