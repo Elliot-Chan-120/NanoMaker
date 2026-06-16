@@ -343,16 +343,16 @@ note: all generation is happening in  33x33x33 Angstrom space.
 | Surface Patch                                           | Claw                                            |
 |---------------------------------------------------------|-------------------------------------------------|
 | Flat shape, does not cover any dimension significantly. | Shallow pocket, resembles an outstretched claw. |
-| Side view, amino acid color code                        | Side view, steric accessibility color code      |
+| Side view, amino acid color code                        | Side view, hydrophobicity color code            |
 | <img src="images/surface_aa.png" width="400">           | <img src="images/claw_hydro.png" width="400">   |                                                 |  
-
-All pockets I've ever generated stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
 
 | Vice                                        | Chamber                                         |
 |---------------------------------------------|-------------------------------------------------|
 | Resembles a partially enclosed vice or hand | 3D coverage, forms a chamber-like pocket        |
 | Top-down view, polar character color code   | Top-down view, flexibility color code           |
 | <img src="images/vice_pc.png" width="400">  | <img src="images/chamber_flex.png" width="400"> |
+
+All pockets I've ever generated stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
 
 With some pockets you might have to play around with the perspective (and your imagination) to see the shapes mentioned.
 
