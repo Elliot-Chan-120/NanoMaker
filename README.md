@@ -43,7 +43,7 @@ python3 -m venv .venv
 Activate virtual environment
 ```
 source .venv/bin/activate  <- Linux and Mac
-source .venv/Scripts/activate  <- Windows
+.venv/Scripts/activate  <- Windows
 ```
 
 Install requirements
@@ -161,7 +161,7 @@ are not sentences to be translated, they're 3D structures with each node represe
 NanoMaker employs a unique method to convert these 3D biochemical environments into a sequential representation Skeleton and NAAnoBot can learn from.
 
 ## (Inverse) Radial Sequencing
-I imagined the space around an arbitary drug centroid as a series of spherical shells, with each sequential shell's radius increasing. 
+I imagined the space around an arbitrary drug centroid as a series of spherical shells, with each sequential shell's radius increasing. 
 Think of a glass ball within a glass ball many times over, with the outermost glass ball being the largest and vice versa.
 I've characterized 3D protein binding pockets as "radial" sequences of AA identities and their spherical coordinates ordered by decreasing shell radius. 
 The fineness of the ordering is determined by a "radial_resolution" parameter (default 100, so 100 shells or glass balls). 
@@ -315,7 +315,7 @@ This is a preliminary test and should not be interpreted as validation of bindin
 |---------------|-------|--------------------------------------------------|
 | methotrexate  | -1.85 | 3.8410                                           |
 | caffeine      | -0.07 | 0.5391                                           |
-| ciproflaxin   | 0.28  | 2.7745                                           |
+| ciprofloxacin | 0.28  | 2.7745                                           |
 | benzene       | 2.13  | 1.3470                                           |
 | diazepam      | 2.82  | 4.0941                                           |
 | cyclosporin A | 2.92  | 2.4520                                           |
