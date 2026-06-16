@@ -345,6 +345,7 @@ note: all generation is happening in  33x33x33 Angstrom space.
 | Flat shape, does not cover any dimension significantly. | Shallow pocket, resembles an outstretched claw. |
 | Side view, amino acid color code                        | Side view, steric accessibility color code      |
 | <img src="images/surface_aa.png" width="400">           | <img src="images/claw_hydro.png" width="400">   |                                                 |  
+
 All pockets I've ever generated stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
 
 | Vice                                        | Chamber                                         |
