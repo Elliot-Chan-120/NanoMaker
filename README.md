@@ -256,7 +256,7 @@ NAAnoBot's loss is a composite of cross entropy and weighted similarity between 
 The data split was done according to drug scaffold identity rather than a random split after combinatorial explosion of drug vs. sequence windows. 
 
 Total SMILES were split 80% into training and 20% into validation prior to sequence window extraction.
-Training split comprised of 5 million training sequence windows. Validation set was comprised solely of molecule scaffolds non-existent in training data, 
+Training split comprised of ~7 million training sequence windows. Validation set was comprised solely of molecule scaffolds non-existent in training data, 
 meaning that the models' performance relies on whether they learnt actual relationships b/w 3D arrangement, biochemistry and drug structure rather than memorization.
 
 See Disclaimer at the bottom regarding novel chemistry generalization ability and justification for using scaffolds instead of absolute drug analogues.
