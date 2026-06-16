@@ -148,8 +148,10 @@ Notable Binding Pocket Characteristics:
 ```
 Note that aspirin does have polar and hydrophilic character so the characteristics line up nice. See "Performance and Model Behaviour" for a more complete picture of how these models behave during generation.
 
-With that we've successfully generated, visualized and analyzed a protein binding pocket for Aspirin!
-I've included a separate test run for vitamin C in the source files.
+**With that we've successfully generated, visualized and analyzed a protein binding pocket for Aspirin!**
+
+I've included a series of .nanopkt files of different drugs and scaffolds in the output folder, 
+as well as ones that produce various pocket shapes.
 
 ---
 
@@ -333,10 +335,26 @@ blueprints rather than actual protein pocket templates (none of NanoMaker's outp
 Furthermore, other small drugs that were planning on being tested like urea had empty scaffolds where the scaffold would literally be "". 
 So its impossible to tell how well NAAnoBot would generalize to such molecules who literally don't have scaffolds. 
 
-Observationally, it appears there is a link between Skeleton's choices in protein cage design and molecule size. 
-Throughout the process of making NanoMaker, I noticed that dominant pocket styles for larger SMILES (more characters) 
-and generally, larger scaffolds, were "chambers" (think of a cupped hand). For smaller molecules, surface-like patches and vice-shaped pockets were more common.
-All pockets synthesized stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
+Observationally, it appears there is a link between Skeleton's choices in protein cage design. 
+Throughout the process of making NanoMaker, I noticed that pocket styles varied across different molecules. 
+I characterized them into 4 types named after the shapes they roughly tend to adopt. 
+note: all generation is happening in  33x33x33 Angstrom space.
+
+| Surface Patch                                           | Claw                                            |
+|---------------------------------------------------------|-------------------------------------------------|
+| Flat shape, does not cover any dimension significantly. | Shallow pocket, resembles an outstretched claw. |
+| Side view, amino acid color code                        | Side view, steric accessibility color code      |
+| <img src="images/surface_aa.png" width="400">           | <img src="images/claw_hydro.png" width="400">   |                                                 |  
+All pockets I've ever generated stuck to one hemisphere of the centroid, whether or not this reflects the actual biochemistry is out of my depth...
+
+| Vice                                        | Chamber                                         |
+|---------------------------------------------|-------------------------------------------------|
+| Resembles a partially enclosed vice or hand | 3D coverage, forms a chamber-like pocket        |
+| Top-down view, polar character color code   | Top-down view, flexibility color code           |
+| <img src="images/vice_pc.png" width="400">  | <img src="images/chamber_flex.png" width="400"> |
+
+With some pockets you might have to play around with the perspective (and your imagination) to see the shapes mentioned.
+
 
 Overall, this project demonstrates that the architecture can generate structurally varied protein binding pockets whose 
 aggregated biochemical properties appear to vary with the ligand scaffold's features. Further validation would be needed

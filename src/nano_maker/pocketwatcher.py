@@ -288,12 +288,13 @@ class PocketWatcher:
 
 
         # summary metrics + shape inference
+        # definitely not perfect
         if broad_count == 3:
-            receptor_style = "cage-style binding pocket"
-        elif broad_count == 2:
             receptor_style = "chamber-style binding pocket"
-        elif broad_count == 1:
+        elif broad_count == 2:
             receptor_style = "vice-style binding pocket"
+        elif broad_count == 1:
+            receptor_style = "claw-like binding pocket"
         else: # broad count is still 0...
             receptor_style = "surface patch-style binding pocket"
 
