@@ -14,7 +14,7 @@ while model 2, **NAAnoBot**, slots amino acids (AAs) into the empty coordinates 
 Both transformers are cross-attention models conditioned on drug structure, 
 meaning that each protein pocket is specific to the given drug's properties.
 
-I've drawn out a conceptual example skeleton and its populated final form, you can see what they look like in practice further down:
+I've drawn out a conceptual example skeleton and its populated final form, we will see what they look like in practice further down:
 
 |        Figure 1: 3D arrangement / "skeleton"         |       Figure 2: Full NanoMaker-generated pocket        |
 |:----------------------------------------------------:|:------------------------------------------------------:|
@@ -23,12 +23,13 @@ I've drawn out a conceptual example skeleton and its populated final form, you c
 On the left we see a system of linked empty nodes representing AA slots forming a pocket around the ligand centroid (drug geometric center).
 In the drawing on the right I've filled in those nodes with amino acid identities, completing the protein binding pocket.
 
+You can interact with some protein pockets I've made on my own through my portfolio website:
+[CLICK ME!](https://elliot-chan-120.github.io/#nanomaker_proteins)
+
 Notes: 
 - "Ligand" and "drug" will be used interchangeably. A ligand is just something that binds. In this case it's a chemical structure.
 - Scaffold: core structure of a given drug
 - Analog(ue): variation of a scaffold
-
-
 
 ---
 
@@ -149,9 +150,6 @@ Notable Binding Pocket Characteristics:
 Note that aspirin does have polar and hydrophilic character so the characteristics line up nice. See "Performance and Model Behaviour" for a more complete picture of how these models behave during generation.
 
 **With that we've successfully generated, visualized and analyzed a protein binding pocket for Aspirin!**
-
-I've included a series of .nanopkt files of different drugs and scaffolds in the output folder, 
-as well as ones that produce various pocket shapes.
 
 ---
 
