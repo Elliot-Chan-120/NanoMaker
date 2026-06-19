@@ -321,13 +321,17 @@ This is a preliminary test and should not be interpreted as validation of bindin
 | paclitaxel    | 3.96  | 1.2955                                           |
 | atorvastatin  | 4.46  | 4.8161                                           |
 | cholesterol   | 8.74  | 5.1344                                           |
+R^2 = 0.209
 
 | Benchmark Graph: Compound LogP vs Protein Polar Character * 10 |
 |----------------------------------------------------------------| 
-| ![benchmark_linegraph.png](images/benchmark_linegraph.png)     |                                                          |
+| ![benchmark_linegraph.png](images/benchmark_linegraph.png)     |
 
-Visual observations show that there is a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
-There are a few spikes that appear out of place, which are most likely due to some of the chemical compounds' scaffolds being widely different from their original identity.
+Visual observations suggested a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
+However, a direct correlation analysis came back weak at 0.21. With only 10 compounds with wildly varying structures, this isn't enough to confirm or rule out
+biochemical reasoning either way. Future scope of this project would involve extensive benchmarking with either more standardized structures with minimized variance in 3D structure,
+or a signifcantly upscaled set of molecules.
+
 This is consistent with the disclaimer mentioned below that molecules whose R groups contribute heavily to binding dynamics are not reliable and should be treated as scaffold-level
 blueprints rather than actual protein pocket templates (none of NanoMaker's outputs should be anyway but you get the point). 
 Furthermore, other small drugs that were planning on being tested like urea had empty scaffolds where the scaffold would literally be "". 
