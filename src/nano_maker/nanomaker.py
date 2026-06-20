@@ -61,12 +61,14 @@ class NanoMaker:
         self._version = version_code
         # good to have if down the line this becomes a bigger thing, allows us to check differences across iterations
 
+        self._scaffold = None
 
     def ingest_chemical(self, smiles):
         """easier to overwrite"""
         self._smiles = smiles
         scaffold = MurckoScaffold.GetScaffoldForMol(Chem.MolFromSmiles(smiles))
         scaffold_smiles = Chem.MolToSmiles(scaffold)
+        self._scaffold = scaffold_smiles
 
         # class variable assignment / update
         self._scaffold_smiles = scaffold_smiles

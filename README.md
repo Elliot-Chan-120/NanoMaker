@@ -230,7 +230,7 @@ Model: NAAnoBot is responsible for deciding which amino acid belongs in a given 
 Each AA is characterized by their physicochemical properties and (bio)chemical makeup that 
 distinguish them from the rest. 
 NAAnoBot works with spatially aware "tokens", meaning it actually doesn't interpret sequences via 
-amino acid identities (like "A", "H", "C" .etc) but rather their feature vectors and relative geometries. 
+amino acid identities (like "A", "H", "C" etc.) but rather their feature vectors and relative geometries. 
 Its selection of the next AA depends on the neighbouring
 AAs biochemistry *and* their spatial positioning relative to the target coordinate.
 
@@ -303,39 +303,46 @@ evaluating how "good" each of these models is.
 ## Performance and Model Behaviour Observations
 Since truly examining NAAnoBot's biochemical reasoning ability would require extensive analyses, 
 I decided to plot average protein pocket polar character over 10 generated pockets vs. 10 drug logP (hydrophobicity / polarity inferred) 
-values as a proxy for its potential biochemical reasoning ability. Sampling temperature was set to 0.01 (basically argmax) for maximum strictness and no variation. 
+values as a proxy for its potential biochemical reasoning ability. Sampling temperature was set to 0.05 (basically argmax) for maximum strictness and no variation. 
 Pockets produced were definitely not natural but were representative of NAAnoBot's behaviour.
 Polar character is an aggregate across net charge, hydrophobicity, # of H donors and H acceptors.
 
 This is a preliminary test and should not be interpreted as validation of binding-pocket realism.
 
-| Compound Name | LogP  | Protein Pocket Polar_character x10 (readability) |
-|---------------|-------|--------------------------------------------------|
-| methotrexate  | -1.85 | 3.8410                                           |
-| caffeine      | -0.07 | 0.5391                                           |
-| ciprofloxacin | 0.28  | 2.7745                                           |
-| benzene       | 2.13  | 1.3470                                           |
-| diazepam      | 2.82  | 4.0941                                           |
-| cyclosporin A | 2.92  | 2.4520                                           |
-| testosterone  | 3.32  | 3.4497                                           |
-| paclitaxel    | 3.96  | 1.2955                                           |
-| atorvastatin  | 4.46  | 4.8161                                           |
-| cholesterol   | 8.74  | 5.1344                                           |
-R^2 = 0.209
+| Compound Name | Scaffold LogP | Protein Pocket Polar_character x10 (readability) |
+|---------------|---------------|--------------------------------------------------|
+| methotrexate  | 2.0319        | 3.8410                                           |
+| caffeine      | -1.0605       | 0.5391                                           |
+| ciprofloxacin | 1.746         | 2.7745                                           |
+| benzene       | 1.687         | 1.3470                                           |
+| diazepam      | 2.476         | 4.0941                                           |
+| cyclosporin A | -9.722        | 2.4520                                           |
+| testosterone  | 4.128         | 3.4497                                           |
+| paclitaxel    | 6.0356        | 1.2955                                           |
+| atorvastatin  | 5.601         | 4.8161                                           |
+| cholesterol   | 4.949         | 5.1344                                           |
+R^2 = 0.116
+R^2 excluding cyclosporin and paclitaxel: 0.755 (Explanation for this metric below)
 
 | Benchmark Graph: Compound LogP vs Protein Polar Character * 10 |
 |----------------------------------------------------------------| 
-| ![benchmark_linegraph.png](images/benchmark_linegraph.png)     |
+| <img src="images/scaffold_logp_polar_char.png" width="700">    |
 
-Visual observations suggested a moderate positive correlation between the increase in LogP of a given compound's SMILES and NAAnoBot's amino acid choices on average.
-However, a direct correlation analysis came back weak at 0.21. With only 10 compounds with wildly varying structures, this isn't enough to confirm or rule out
-biochemical reasoning either way. Future scope of this project would involve extensive benchmarking with either more standardized structures with minimized variance in 3D structure,
-or a signifcantly upscaled set of molecules.
+The graph above shows two roughly drawn correlation lines which I'll explain.
 
-This is consistent with the disclaimer mentioned below that molecules whose R groups contribute heavily to binding dynamics are not reliable and should be treated as scaffold-level
-blueprints rather than actual protein pocket templates (none of NanoMaker's outputs should be anyway but you get the point). 
+Using scaffold-level LogP rather than absolute identity LogP, correlation (green line) across all 10 compounds was very weak with an R^2 of 0.116.
+Visually and after consulting the table, it's clear that this is almost entirely driven by cyclosporin and paclitaxel,
+which have two of the most extreme scaffold LogPs of (roughly) -9.8 and 6 out of the entire dataset (smallest and largest).
+Furthermore, on a biochemical level these two are large and highly complex, one being a macrocycle and the other having a fused tetracyclic core (human terms: massive ring, and 4 fused rings).
+Those two outlier molecules are exactly within the category flagged in the Disclaimer section as poorly generalized under scaffold-level data splitting.
+
+**When correlation analysis was done on the non-outlier set (light blue line) consisting mainly of more compact molecules' scaffolds, correlation shot up to 0.755 (strong correlation).**
+
+Although the sample and testing are both too small and too simplistic to treat as conclusive, 
+this suggests that NanoMaker's biochemical reasoning may be more reliable for smaller, 
+scaffold-representative molecules than for larger macromolecules whose core scaffolds don't capture extensive binding-relevant features.
 Furthermore, other small drugs that were planning on being tested like urea had empty scaffolds where the scaffold would literally be "". 
-So its impossible to tell how well NAAnoBot would generalize to such molecules who literally don't have scaffolds. 
+So it's impossible to tell how well NAAnoBot would generalize to such molecules who literally don't have scaffolds. 
 
 Observationally, it appears there is a link between Skeleton's choices in protein cage design. 
 Throughout the process of making NanoMaker, I noticed that pocket styles varied across different molecules. 
@@ -382,7 +389,7 @@ The problem is, for drug-protein pairs with high-affinity binding of 0.1nM, many
 This led to many compounds with the same scaffold but with 10-80+ analogues within each train-test split, introducing a
 high degree of data homogeneity and a slight possibility of minimal data leakage (1 cluster of drug analogs split across the train / test).
 
-NanoMaker was essentially being trained, then tested on chemically homogenous data. Which is not optimal at all for 
+NanoMaker was essentially being trained, then tested on chemically homogeneous data. Which is not optimal at all for 
 zero-shot capability on novel chemistry, one of the main goals of this project.
 
 All chemical compounds were then split by their scaffolds, removing analogs and looking at their core chemistry and structure instead. 
