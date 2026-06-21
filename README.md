@@ -321,7 +321,9 @@ This is a preliminary test and should not be interpreted as validation of bindin
 | paclitaxel    | 6.0356        | 1.2955                                           |
 | atorvastatin  | 5.601         | 4.8161                                           |
 | cholesterol   | 4.949         | 5.1344                                           |
+
 R^2 = 0.116
+
 R^2 excluding cyclosporin and paclitaxel: 0.755 (Explanation for this metric below)
 
 | Benchmark Graph: Compound LogP vs Protein Polar Character * 10 |
