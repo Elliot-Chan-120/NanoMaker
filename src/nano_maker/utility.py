@@ -28,11 +28,16 @@ def save_nano_pocket(pocket_data, filename):
     full_content += header
     full_content += target
     full_content += nano_pocket
-    with open(Path(POCKET_DATA) / f"{filename}.nanopkt", 'w', encoding="UTF-8") as outpath:
+
+    # Create output directory if it doesn't exist
+    Path(POCKET_DATA).mkdir(parents=True, exist_ok=True)
+
+    output_path = Path(POCKET_DATA) / f"{filename}.nanopkt"
+    with open(output_path, 'w', encoding="UTF-8") as outpath:
         outpath.write(full_content)
 
     print(f"Pocket data for {smiles} saved:")
-    print(f"Find nano pocket file in: {outpath}")
+    print(f"Find nano pocket file in: {output_path}")
 
     return True
 
