@@ -98,7 +98,7 @@ class NanoMaker:
                 pocket_sph_skeleton = sph_coordinates  # user gave something -> use those
                                                        # down the line need error handling for these
         else:
-            return ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
+            raise ValueError("Run function: ingest_chemical prior to attempting to generate protein cage")
 
         raw_skeleton = self._pocket_xyz_skeleton(pocket_sph_skeleton)
         skeleton = [[round(num, 4) for num in coords] for coords in raw_skeleton]

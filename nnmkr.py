@@ -42,10 +42,19 @@ def generate(args):
     smiles_str = args.smiles
     sampling_temp = args.temp if args.temp is not None else 0.3
     if not (0.01 <= sampling_temp <= 1):
-        print('temp must be a float between 0.01 and 1')
-        sys.exit()
+        print('Error: sampling temperature must be between 0.01 and 1.0', file=sys.stderr)
+        sys.exit(1)
     output_filename = sanitize_filename(args.o) if args.o is not None else None
 
+    # Validate SMILES strings before ANY inference
+    try:
+        from src.nano_maker.modules.nAAno.smiles_handler import eval_lipinski
+        drug_like_score = eval_lipinski(smiles_str)
+        if drug_like_score < 3:
+            print(f"Warning: SMILES may not be drug like (passed {drug_like_score}/4 Lipinski rules). Generation might be subOptimal", file=sys.stderr)
+    except ValueError as e:
+        print(f"Error: Invalid SMILES string - {e}", file=sys.stderr)
+        sys.exit(1)
 
     nnmkr.ingest_chemical(smiles_str)
     pocket_data = nnmkr.generate_nanopkt_data(sampling_temp=sampling_temp)
@@ -101,17 +110,17 @@ def main():
         epilog=
         """
         NanoMaker command list:
-        
+
         note: every saved item goes in src/output_container
-        
+
             [1] generate
                 - input: chemical smiles string and an output_filename (o)
                 - output: output_filename.nanopkt targeting the given smiles
-            
+
             [2] visualize
-                - input: access_filename, visualization mode and --output_filename (optional) 
+                - input: access_filename, visualization mode and --output_filename (optional)
                 - output: opens + visualizes access_filename.nanopkt and optionally saves it as output_filename.html
-                
+
             [3] report
                 - input: access_filename and --output_filename (optional)
                 - output: opens + generates report for access_filename.nanopkt and optionally saves it as output_filename.txt

@@ -21,11 +21,64 @@ class PocketWatcher:
     # pt1 -> get it to retrieve data either by passing the data or the file
     def ingest_file(self, pocket_filepath):
         self._nanopkt_data = load_nano_pocket(pocket_filepath)
+        if self._nanopkt_data is False:
+            raise ValueError(f"Failed to load pocket file: {pocket_filepath}")
+        self._validate_pocket_data(self._nanopkt_data)
         return True
 
     def ingest_data(self, pocket_data):
-        #TODO: data sanity checks before setting pocket_data to class variable
+        """
+        Ingest `pocket data` from a dictionary.
+        Validates data consistency before storing.
+
+        :param pocket_data: Dictionary containing pocket data
+        :raises ValueError: If data validation fails
+        """
+        self._validate_pocket_data(pocket_data)
         self._nanopkt_data = pocket_data
+        return True
+
+    def _validate_pocket_data(self, pocket_data):
+        """
+        Untilfunc to Validate pocket data consistency and structure.
+
+        :param pocket_data: Dictionary to validate
+        :raises ValueError: If validation fails
+        """
+        #  Keys for Validation
+        required_keys = ["version_code", "SMILES", "Scaffold", "Sampling_temperature",
+                        "3D_skeleton", "aa_sequence"]
+        for key in required_keys:
+            if key not in pocket_data:
+                raise ValueError(f"Missing required key in pocket data: {key}")
+
+        #Collection validator
+        if not isinstance(pocket_data["3D_skeleton"], list):
+            raise ValueError("3D_skeleton must be a list")
+        if not isinstance(pocket_data["aa_sequence"], list):
+            raise ValueError("aa_sequence must be a list")
+
+        # Validate array length consistency
+        skeleton_len = len(pocket_data["3D_skeleton"])
+        sequence_len = len(pocket_data["aa_sequence"])
+        if skeleton_len != sequence_len:
+            raise ValueError(
+                f"D_skeleton has {skeleton_len} entries but aa_sequence has {sequence_len} entries."
+            )
+
+        # Validate coordinate format
+        for idx, coords in enumerate(pocket_data["3D_skeleton"]):
+            if not isinstance(coords, (list, tuple)):
+                raise ValueError(f"Coordinate {idx} is not a list or tuple: {coords}")
+            if len(coords) != 3:
+                raise ValueError(
+                    f"Coordinate {idx} must have exactly 3 values [x, y, z], got {len(coords)}: {coords}"
+                )
+            # Verify coordinates are numeric
+            try:
+                [float(c) for c in coords]
+            except (ValueError, TypeError):
+                raise ValueError(f"Coordinate {idx} contains non-numeric values: {coords}")
 
 
     def visualize_pocket(self, identifier="skeleton", outfile_name=None):
