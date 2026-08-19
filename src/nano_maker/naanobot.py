@@ -32,6 +32,10 @@ class NAAnoBot(nn.Module):
 
         # layers + architecture
         self.nAAno_project = nn.Linear(total_features, n_embd)  # feed nAAno feature vector
+        # note for both skeleton and naanobot
+        # indexing into a linear map that takes the raw continuous feature space to project into the embedding space
+        # functionally the same role just via a different mechanism
+
         self.pos_emb = nn.Embedding(block_size, n_embd)
         self.mol_encoder = MolecularEncoder(n_embd, map4_res, dropout)
 
